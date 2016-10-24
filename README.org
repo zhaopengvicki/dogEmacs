@@ -317,21 +317,19 @@
 | C-b (光标位于空行时) | 上一个有意义的缩进 |
 
 #+BEGIN_SRC emacs-lisp
-
-  ;; (use-package parinfer
-  ;;   :bind
-  ;;   (("C-'" . parinfer-toggle-mode)
-  ;;    ("M-r" . parinfer-raise-sexp))
-  ;;   :config
-  ;;   (parinfer-strategy-add 'default 'newline-and-indent)
-  ;;   :init
-  ;;   (require 'ediff)
-  ;;   (setq ediff-window-setup-function 'ediff-setup-windows-plain)  
-  ;;   (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
-  ;;   (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank))
-  ;;   (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
-  ;;   (add-hook 'clojure-mode-hook 'parinfer-mode))
-
+  (use-package parinfer
+    :bind
+    (("C-'" . parinfer-toggle-mode)
+     ("M-r" . parinfer-raise-sexp))
+    :config
+    (parinfer-strategy-add 'default 'newline-and-indent)
+    :init
+    (require 'ediff)
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain)  
+    (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
+    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank one))
+    (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
+    (add-hook 'clojure-mode-hook 'parinfer-mode))
 #+END_SRC
 
 ** Clojure相关
