@@ -233,6 +233,7 @@
   (use-package company
     :bind
     (:map company-active-map
+          ("<escape>" . company-abort)
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
