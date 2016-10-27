@@ -28,6 +28,19 @@
       (exec-path-from-shell-initialize)))
 #+END_SRC
 
+** 备份文件
+把备份文件放在 =~/.backup= 目录下，并且存更多的版本。
+#+BEGIN_SRC emacs-lisp
+  (setq backup-directory-alist `(("." . "~/.backup")))
+
+  (setq backup-by-copying t)
+
+  (setq delete-old-versions t
+        kept-new-versions 6
+        kept-old-versions 2
+        version-control t)
+#+END_SRC
+
 ** 平滑滚动
 #+BEGIN_SRC emacs-lisp
   (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))
@@ -80,13 +93,6 @@
               (face-remap-add-relative 'default :family "Source Han Sans HW")))  
 #+END_SRC
 
-** 光标样式的设置
-#+BEGIN_SRC emacs-lisp
-  (blink-cursor-mode 1)
-  (setq cursor-in-non-selected-windows nil)
-  (setq-default cursor-type 'box)
-#+END_SRC
-
 ** 高亮匹配的括号。
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode t)
@@ -96,14 +102,22 @@
 #+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode 1)
 #+END_SRC
+
 ** 空行标志
 #+BEGIN_SRC emacs-lisp
   (setq-default indicate-empty-lines t)
 #+END_SRC
+
+** 光标
+#+BEGIN_SRC emacs-lisp
+  (setq-default cursor-type '(bar . 1))
+#+END_SRC
+
 ** 使用ESC做退出按键
 #+BEGIN_SRC emacs-lisp
   (bind-key "<escape>" 'keyboard-escape-quit global-map)
 #+END_SRC
+
 ** 关闭electric-indent-mode
 #+BEGIN_SRC emacs-lisp
   (defun user/rebind-return-key ()
@@ -116,16 +130,11 @@
 * 主题
 ** 主题插件
 #+BEGIN_SRC emacs-lisp
-  (defvar user/themes '(doom-molokai spacemacs-dark arjen-grey spacemacs-light solarized-dark solarized-light zenburn))
+  (defvar user/themes '(spacemacs-dark arjen-grey spacemacs-light solarized-dark solarized-light zenburn))
   (defvar user/current-theme-index 0)
 
   (set-frame-parameter (selected-frame) 'alpha '(100 100))
   (add-to-list 'default-frame-alist '(alpha 100 100))
-
-  (use-package doom-themes
-    :init
-    (setq doom-enable-bold nil)
-    (setq doom-enable-brighter-comments t))
 
   (use-package arjen-grey-theme)
 
