@@ -66,6 +66,10 @@
 
 #+RESULTS:
 
+** 关闭Tooltip
+#+BEGIN_SRC emacs-lisp
+  (tooltip-mode -1)
+#+END_SRC
 ** 始终开启列号
 #+BEGIN_SRC emacs-lisp
   (setq column-number-mode t)
@@ -81,7 +85,7 @@
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
                       :family "Source Code Pro"
-                      :height 130
+                      :height 135
                       :weight 'regular)
 #+END_SRC
 
@@ -110,7 +114,7 @@
 
 ** 光标
 #+BEGIN_SRC emacs-lisp
-  (setq-default cursor-type '(bar . 1))
+  (setq-default cursor-type '(bar . 2))
 #+END_SRC
 
 ** 使用ESC做退出按键
@@ -163,12 +167,11 @@
 
 ** Powerline
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package powerline
-  ;;   :init
-  ;;   (setq powerline-default-separator 'utf-8)
-  ;;   (powerline-center-theme))
+  (use-package powerline
+    :init
+    (setq powerline-default-separator 'utf-8)
+    (powerline-vim-theme))
 #+END_SRC
-
 * GIT
 [[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
 #+BEGIN_SRC emacs-lisp
