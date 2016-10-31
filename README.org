@@ -75,26 +75,15 @@
   (setq column-number-mode t)
 #+END_SRC
 
+** 开启行号
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum
+    :init
+    (add-hook 'prog-mode-hook 'nlinum-mode))
+#+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
   (setq-default indent-tabs-mode nil)
-#+END_SRC
-
-** 字体设置
-*** 设置代码中使用的字体 
-#+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'default nil
-                      :family "Source Code Pro"
-                      :height 135
-                      :weight 'regular)
-#+END_SRC
-
-*** 配置Org-mode使用的字体
-使用一个中英文等宽的字体。
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (face-remap-add-relative 'default :family "Source Han Sans HW")))  
 #+END_SRC
 
 ** 高亮匹配的括号。
@@ -131,10 +120,34 @@
 
   (add-hook 'prog-mode-hook 'user/rebind-return-key)
 #+END_SRC
-* 主题
-** 主题插件
+** Eshell
 #+BEGIN_SRC emacs-lisp
-  (defvar user/themes '(spacemacs-dark arjen-grey spacemacs-light solarized-dark solarized-light zenburn))
+  (defun user/eshell-init-keys ()
+    (bind-key "C-l" 'eshell/clear eshell-mode-map))
+
+  (add-hook 'eshell-mode-hook #'user/eshell-init-keys)
+#+END_SRC
+* 样式设置
+** 字体设置
+*** 设置代码中使用的字体 
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'default nil
+                      :family "M+ 1mn"
+                      :height 155
+                      :weight 'regular)
+#+END_SRC
+
+*** 配置Org-mode使用的字体
+使用一个中英文等宽的字体。
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (face-remap-add-relative 'default :family "M+ 1mn")))
+#+END_SRC
+
+** 主题
+#+BEGIN_SRC emacs-lisp
+  (defvar user/themes '(arjen-grey apropospriate-dark apropospriate-light spacemacs-dark spacemacs-light solarized zenburn))
   (defvar user/current-theme-index 0)
 
   (set-frame-parameter (selected-frame) 'alpha '(100 100))
@@ -146,10 +159,12 @@
 
   (use-package zenburn-theme)
 
-  (use-package solarized-theme
+  (use-package apropospriate-theme)
+
+  (use-package color-theme-solarized
     :init
-    (setq solarized-use-less-bold t)
-    (setq solarized-high-contrast-mode-line t))
+    (setq solarized-visibility 'high)
+    (setq solarized-broken-srgb t))
 
   (load-theme (car user/themes) t)
 
@@ -163,14 +178,6 @@
       (load-theme (nth user/current-theme-index user/themes) t)))
 
   (bind-key "C-c C-\\" 'user/next-theme)
-#+END_SRC
-
-** Powerline
-#+BEGIN_SRC emacs-lisp
-  (use-package powerline
-    :init
-    (setq powerline-default-separator 'utf-8)
-    (powerline-vim-theme))
 #+END_SRC
 * GIT
 [[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
@@ -201,7 +208,7 @@
 |------+--------------------------------------|
 | C->  | 将光标放置在下一个出现当前内容的位置 |
 | C-<  | 将光标放置在上一个出现当前内容的位置 |
-| C-\  | 调过这个位置                         |
+| C-\  | 跳过这个位置                         |
 
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
@@ -221,16 +228,16 @@
 | C-p (补全菜单中) | 上一项 |
 
 #+BEGIN_SRC emacs-lisp
-  (defun company-clojure-init ()
+  (defun user/company-clojure-init ()
     (bind-key "<tab>" 'company-indent-or-complete-common clojure-mode-map))
 
-  (defun company-cider-repl-init ()
+  (defun user/company-cider-repl-init ()
     (bind-key "<tab>" 'company-complete-common cider-repl-mode-map))
 
-  (defun company-eshell-init ()
+  (defun user/company-eshell-init ()
     (bind-key "<tab>" 'company-complete-common eshell-mode-map))
 
-  (defun company-elisp-init ()
+  (defun user/company-elisp-init ()
     (bind-key "<tab>" 'company-indent-or-complete-common emacs-lisp-mode-map))
 
   (use-package company
@@ -240,10 +247,10 @@
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
-    (add-hook 'emacs-lisp-mode-hook #'company-elisp-init)
-    (add-hook 'clojure-mode-hook #'company-clojure-init)
-    (add-hook 'eshell-mode-hook #'company-eshell-init)
-    (add-hook 'cider-repl-mode-hook #'company-cider-repl-init)
+    (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
+    (add-hook 'clojure-mode-hook #'user/company-clojure-init)
+    (add-hook 'eshell-mode-hook #'user/company-eshell-init)
+    (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
     (setq company-idle-delay nil)
     (global-company-mode))
 #+END_SRC
@@ -349,7 +356,7 @@
 
 | 按键    | 功能                      |
 |---------+---------------------------|
-| C-x SPC | 格式化当前TOP-LEVEL表达式 |
+| C-c SPC | 格式化当前TOP-LEVEL表达式 |
 
 *** Clojure-mode
 #+BEGIN_SRC emacs-lisp
@@ -412,6 +419,8 @@
 ** Emmet: HTML模板插件
 #+BEGIN_SRC emacs-lisp
   (use-package emmet-mode
+    :bind
+    (("C-c e" . emmet-expand-line))
     :init
     (add-hook 'html-mode-hook 'emmet-mode))
 #+END_SRC
