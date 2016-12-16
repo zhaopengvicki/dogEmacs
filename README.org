@@ -1,6 +1,41 @@
 #+TITLE: 适用于Org和Clojure的Emacs配置
 #+AUTHOR: Shi Tianshu
 
+* 样式设置
+** Transparent
+#+BEGIN_SRC emacs-lisp
+  (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
+  (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+#+END_SRC
+** 字体设置
+*** 设置代码中使用的字体 
+#+BEGIN_SRC emacs-lisp
+  (set-face-attribute 'default nil
+                      :family "M+ 1m"
+                      :height 120
+                      :weight 'medium)
+#+END_SRC
+*** 配置Org-mode使用的字体
+使用一个中英文等宽的字体。
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (face-remap-add-relative 'default :family "M+ 1m")))
+#+END_SRC
+** 主题
+#+BEGIN_SRC emacs-lisp
+  (use-package solarized-theme
+    :init
+    (load-theme 'solarized-dark t))
+  #+END_SRC
+** Powerline
+#+BEGIN_SRC emacs-lisp
+  (use-package smart-mode-line
+    :init
+    (setq sml/no-confirm-load-theme t)
+    (sml/setup)
+    (sml/apply-theme 'respectful))
+#+END_SRC
 * 基本设置
 ** 编码
 始终使用UTF-8编码。
@@ -48,6 +83,10 @@
         mouse-wheel-follow-mouse 't)
 #+END_SRC
 
+** 高亮当前行
+#+BEGIN_SRC emacs-lisp
+  (global-hl-line-mode t)
+#+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
@@ -58,10 +97,9 @@
   (setq frame-title-format "E M A C S")
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
-  (tool-bar-mode -1)
-  (unless window-system
-    (menu-bar-mode -1))
-  (scroll-bar-mode -1)
+  ;;(tool-bar-mode -1)
+  ;;(menu-bar-mode -1)
+  ;;(scroll-bar-mode -1)
 #+END_SRC
 
 #+RESULTS:
@@ -77,9 +115,9 @@
 
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
-  (use-package nlinum
-    :init
-    (add-hook 'prog-mode-hook 'nlinum-mode))
+  ;; (use-package nlinum
+  ;;   :init
+  ;;   (add-hook 'prog-mode-hook 'nlinum-mode))
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
@@ -103,7 +141,7 @@
 
 ** 光标
 #+BEGIN_SRC emacs-lisp
-  (setq-default cursor-type '(bar . 2))
+  ;; (setq-default cursor-type '(bar . 2))
 #+END_SRC
 
 ** 使用ESC做退出按键
@@ -127,58 +165,7 @@
 
   (add-hook 'eshell-mode-hook #'user/eshell-init-keys)
 #+END_SRC
-* 样式设置
-** 字体设置
-*** 设置代码中使用的字体 
-#+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'default nil
-                      :family "M+ 1mn"
-                      :height 155
-                      :weight 'regular)
-#+END_SRC
 
-*** 配置Org-mode使用的字体
-使用一个中英文等宽的字体。
-#+BEGIN_SRC emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (face-remap-add-relative 'default :family "M+ 1mn")))
-#+END_SRC
-
-** 主题
-#+BEGIN_SRC emacs-lisp
-  (defvar user/themes '(arjen-grey apropospriate-dark apropospriate-light spacemacs-dark spacemacs-light solarized zenburn))
-  (defvar user/current-theme-index 0)
-
-  (set-frame-parameter (selected-frame) 'alpha '(100 100))
-  (add-to-list 'default-frame-alist '(alpha 100 100))
-
-  (use-package arjen-grey-theme)
-
-  (use-package spacemacs-theme)
-
-  (use-package zenburn-theme)
-
-  (use-package apropospriate-theme)
-
-  (use-package color-theme-solarized
-    :init
-    (setq solarized-visibility 'high)
-    (setq solarized-broken-srgb t))
-
-  (load-theme (car user/themes) t)
-
-  (defun user/next-theme ()
-    (interactive)
-    (let ((current-theme (nth user/current-theme-index user/themes)))
-      (disable-theme current-theme)
-      (setq user/current-theme-index (1+ user/current-theme-index))
-      (when (= user/current-theme-index (length user/themes))
-        (setq user/current-theme-index 0))
-      (load-theme (nth user/current-theme-index user/themes) t)))
-
-  (bind-key "C-c C-\\" 'user/next-theme)
-#+END_SRC
 * GIT
 [[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
 #+BEGIN_SRC emacs-lisp
@@ -215,7 +202,8 @@
     :bind
     (("C->" . mc/mark-next-like-this)
      ("C-\\" . mc/skip-to-next-like-this)
-     ("C-<" . mc/mark-previous-like-this))
+     ("C-<" . mc/mark-previous-like-this)
+     ("<escape>" . mc/keyboard-quit))
     :init
     (setq mc/always-run-for-all t))
 #+END_SRC
@@ -274,7 +262,8 @@
      ("C-c s" . swiper)
      ("C-c m" . counsel-imenu)
      ("C-c A" . counsel-ag)
-     :map read-expression-map
+     :map ivy-minibuffer-map
+     ("<escape>" . minibuffer-keyboard-quit)
      ("C-r" . counsel-expression-history)))
 
   (use-package counsel-projectile
@@ -318,7 +307,6 @@
 #+END_SRC
 
 * Clojure 开发
-
 ** 高亮匹配的括号。
 
 ** Lisp 基础
@@ -345,9 +333,10 @@
     (parinfer-strategy-add 'default 'newline-and-indent)
     :init
     (require 'ediff)
-    (setq ediff-window-setup-function 'ediff-setup-windows-plain)  
+    (setq ediff-window-setup-function 'ediff-setup-windows-plain)
     (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
-    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank one))
+    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank))
+    (setq parinfer-auto-switch-indent-mode-when-closing t)
     (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
     (add-hook 'clojure-mode-hook 'parinfer-mode))
 #+END_SRC
@@ -361,20 +350,35 @@
 *** Clojure-mode
 #+BEGIN_SRC emacs-lisp
   (use-package clojure-mode
+    :config
+    (define-clojure-indent
+      (defui  '(1 :form :defn)))
     :init
     (add-hook 'clojure-mode-hook #'eldoc-mode)
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
 
+*** 选择使用的方案
+#+BEGIN_SRC emacs-lisp
+  (setq user/use-clojure-env 'cider)
+#+END_SRC
+*** Replique(Optional)
+#+BEGIN_SRC emacs-lisp
+  (when (eq user/use-clojure-env 'replique)
+    (add-to-list 'load-path "~/.emacs.d/replique.el")
+    (require 'replique)
+    (add-hook 'clojure-mode-hook 'replique/minor-mode))
+#+END_SRC
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
-  (use-package cider
-    :init
-    (setq cider-lein-command "/usr/local/bin/lein")
-    (setq cider-boot-command "/usr/local/bin/boot")
-    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-    (setq cider-use-overlays t))
+  (when (eq user/use-clojure-env 'cider)
+    (use-package cider
+      :init
+      (setq cider-lein-command "/usr/local/bin/lein")
+      (setq cider-boot-command "/usr/local/bin/boot")
+      (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+      (setq cider-use-overlays t)))
 #+END_SRC
 
 *** clj-refactor: 重构工具
@@ -387,11 +391,12 @@
     (unbind-key "<tab>" yas-minor-mode-map)
     (unbind-key "TAB" yas-minor-mode-map))
 
-  (use-package clj-refactor
-    :init
-    (cljr-add-keybindings-with-prefix "C-,")
-    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-    (add-hook 'clojure-mode-hook #'yas-minor-mode))
+  (when (eq user/use-clojure-env 'cider)
+    (use-package clj-refactor
+      :init
+      (cljr-add-keybindings-with-prefix "C-,")
+      (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+      (add-hook 'clojure-mode-hook #'yas-minor-mode)))
 #+END_SRC
 
 * Org相关
@@ -416,6 +421,10 @@
 #+END_SRC
 
 * 其他
+** Markdown
+#+BEGIN_SRC emacs-lisp
+  (use-package markdown-mode)
+#+END_SRC
 ** Emmet: HTML模板插件
 #+BEGIN_SRC emacs-lisp
   (use-package emmet-mode
