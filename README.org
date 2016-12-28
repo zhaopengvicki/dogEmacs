@@ -11,22 +11,36 @@
 *** 设置代码中使用的字体 
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
-                      :family "M+ 1m"
-                      :height 120
-                      :weight 'medium)
+                      :family "Inziu IosevkaCC Slab SC"
+                      :height 110
+                      :weight 'regular)
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'org-mode-hook
-            (lambda ()
-              (face-remap-add-relative 'default :family "M+ 1m")))
+  ;; (add-hook 'org-mode-hook
+  ;;           (lambda ()
+  ;;             (face-remap-add-relative 'default :family "Inziu Iosevka CL")))
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
   (use-package solarized-theme
     :init
+    (setq solarized-use-less-bold t)
+    (setq solarized-use-more-italic t)
     (load-theme 'solarized-dark t))
+
+  ;; (use-package zenburn-theme
+  ;;   :init
+  ;;   (load-theme 'zenburn t))
+
+  ;; (use-package apropospriate-theme
+  ;;   :init
+  ;;   (load-theme 'apropospriate-dark t))
+
+  ;; (use-package noctilux-theme
+  ;;   :init
+  ;;   (load-theme 'noctilux t))
   #+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
@@ -112,12 +126,9 @@
 #+BEGIN_SRC emacs-lisp
   (setq column-number-mode t)
 #+END_SRC
-
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package nlinum
-  ;;   :init
-  ;;   (add-hook 'prog-mode-hook 'nlinum-mode))
+  (add-hook 'prog-mode-hook 'linum-mode)
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
@@ -129,6 +140,10 @@
   (show-paren-mode t)
 #+END_SRC
 
+** 行高
+#+BEGIN_SRC emacs-lisp
+  (setq-default line-spacing 10)
+#+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode 1)
@@ -142,6 +157,7 @@
 ** 光标
 #+BEGIN_SRC emacs-lisp
   ;; (setq-default cursor-type '(bar . 2))
+  (blink-cursor-mode -1)
 #+END_SRC
 
 ** 使用ESC做退出按键
@@ -400,6 +416,11 @@
 #+END_SRC
 
 * Org相关
+** PDF
+#+BEGIN_SRC emacs-lisp
+(require 'ox-latex-chinese)
+(oxlc/toggle-ox-latex-chinese t)
+#+END_SRC
 ** 美化符号
 #+BEGIN_SRC emacs-lisp
   (use-package org-bullets
