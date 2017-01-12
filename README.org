@@ -11,8 +11,8 @@
 *** 设置代码中使用的字体 
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
-                      :family "Inziu IosevkaCC Slab SC"
-                      :height 110
+                      :family "Inziu IosevkaCC SC"
+                      :height 160
                       :weight 'regular)
 #+END_SRC
 *** 配置Org-mode使用的字体
@@ -24,11 +24,11 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package solarized-theme
-    :init
-    (setq solarized-use-less-bold t)
-    (setq solarized-use-more-italic t)
-    (load-theme 'solarized-dark t))
+  ;; (use-package solarized-theme
+  ;;   :init
+  ;;   (setq solarized-use-less-bold t)
+  ;;   (setq solarized-use-more-italic t)
+  ;;   (load-theme 'solarized-dark t))
 
   ;; (use-package zenburn-theme
   ;;   :init
@@ -41,6 +41,12 @@
   ;; (use-package noctilux-theme
   ;;   :init
   ;;   (load-theme 'noctilux t))
+
+  ;; (load-theme 'leuven t)
+
+  (use-package spacemacs-theme
+    :init
+    (load-theme 'spacemacs-light t))
   #+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
@@ -67,6 +73,7 @@
 使用 =option= 作为 =Meta= key.
 #+BEGIN_SRC emacs-lisp
   (setq mac-option-modifier 'meta)
+  (setq mac-command-modifier 'meta)
 #+END_SRC
 
 处理执行文件在 =PATH= 下，却找不到的情况。
@@ -97,9 +104,19 @@
         mouse-wheel-follow-mouse 't)
 #+END_SRC
 
-** 高亮当前行
+** 高亮当前S表达式
 #+BEGIN_SRC emacs-lisp
-  (global-hl-line-mode t)
+  (defface hl-sexp-face
+    '((t (:inherit hl-line)))
+    "highlight face for hl-sexp mode."
+    :group 'faces)
+
+  (use-package hl-sexp
+    :init
+    (require 'hl-line)
+    (add-hook 'lisp-mode-hook 'hl-sexp-mode)
+    (add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
+    (add-hook 'clojure-mode-hook 'hl-sexp-mode))
 #+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
@@ -111,9 +128,9 @@
   (setq frame-title-format "E M A C S")
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
-  ;;(tool-bar-mode -1)
-  ;;(menu-bar-mode -1)
-  ;;(scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
 #+END_SRC
 
 #+RESULTS:
@@ -128,7 +145,8 @@
 #+END_SRC
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'prog-mode-hook 'linum-mode)
+  ;; (setq linum-format "%4d ")
+  ;; (add-hook 'prog-mode-hook 'linum-mode)
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
@@ -142,7 +160,7 @@
 
 ** 行高
 #+BEGIN_SRC emacs-lisp
-  (setq-default line-spacing 10)
+  (setq-default line-spacing 2)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
@@ -156,8 +174,8 @@
 
 ** 光标
 #+BEGIN_SRC emacs-lisp
-  ;; (setq-default cursor-type '(bar . 2))
-  (blink-cursor-mode -1)
+  (setq-default cursor-type '(bar . 2))
+  (blink-cursor-mode 1)
 #+END_SRC
 
 ** 使用ESC做退出按键
@@ -189,9 +207,16 @@
     :bind
     (("C-x M-g" . magit-dispatch-popup))
     :init
+    (setq magit-completing-read-function 'ivy-completing-read)
     (global-magit-file-mode t))
 #+END_SRC 
 
+[[https://github.com/syohex/emacs-git-gutter-fringe][Git gutter]] 提供了在fringe显示git状态的功能。
+#+BEGIN_SRC emacs-lisp
+  (use-package git-gutter-fringe
+    :init
+    (global-git-gutter-mode))
+#+END_SRC
 * 基础插件
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
@@ -284,6 +309,7 @@
 
   (use-package counsel-projectile
     :init
+    (setq projectile-completion-system 'ivy)
     (counsel-projectile-on))
 
   (use-package ivy
@@ -344,14 +370,20 @@
   (use-package parinfer
     :bind
     (("C-'" . parinfer-toggle-mode)
-     ("M-r" . parinfer-raise-sexp))
+     ("M-r" . parinfer-raise-sexp)
+     ("<tab>" . parinfer-smart-tab:dwim-right-or-complete)
+     ("S-<tab>" . parinfer-smart-tab:dwim-left))
     :config
     (parinfer-strategy-add 'default 'newline-and-indent)
+    (parinfer-strategy-add 'instantly
+      '(parinfer-smart-tab:dwim-right
+        parinfer-smart-tab:dwim-right-or-complete
+        parinfer-smart-tab:dwim-left))
     :init
     (require 'ediff)
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
     (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
-    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank))
+    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
     (setq parinfer-auto-switch-indent-mode-when-closing t)
     (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
     (add-hook 'clojure-mode-hook 'parinfer-mode))
@@ -416,28 +448,38 @@
 #+END_SRC
 
 * Org相关
-** PDF
+** 执行脚本
 #+BEGIN_SRC emacs-lisp
-(require 'ox-latex-chinese)
-(oxlc/toggle-ox-latex-chinese t)
+  (require 'ob-sh)
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((sh . t)))
 #+END_SRC
 ** 美化符号
 #+BEGIN_SRC emacs-lisp
+  (setq org-ellipsis "⤵")
   (use-package org-bullets
     :init
     (add-hook 'org-mode-hook 'org-bullets-mode))
 #+END_SRC
 
+** 导出markdown
+#+BEGIN_SRC emacs-lisp
+  (eval-after-load "org"
+    '(require 'ox-md nil t))
+#+END_SRC
 ** org-mode
 #+BEGIN_SRC emacs-lisp
   (use-package org
     :init
     (setq org-src-fontify-natively t)
+    (setq org-hide-leading-stars t)
+    (setq org-log-into-drawer t)
+    (setq org-todo-keywords '((sequence "TODO(t)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELED(c@)")))
     (add-hook 'org-mode-hook
         (lambda ()
           (setq org-src-ask-before-returning-to-edit-buffer nil)
           (org-indent-mode 1))))
-
   (use-package org-plus-contrib)
 #+END_SRC
 

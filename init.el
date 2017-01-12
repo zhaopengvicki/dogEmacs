@@ -29,9 +29,13 @@
 ;; Basics
 ;; -----------------------------------------------------------------------------
 
-(org-babel-load-file (expand-file-name "~/.emacs.d/README.org"))
-(when (file-exists-p "~/.emacs.d/PRIVATE.org")
-  (org-babel-load-file "~/.emacs.d/PRIVATE.org"))
-(server-start)
+(use-package cl)
+(require 'cl)
 
+(cl-letf (((symbol-function 'message) #'format))
+  (org-babel-load-file (expand-file-name "~/.emacs.d/README.org"))
+  (when (file-exists-p "~/.emacs.d/PRIVATE.org")
+    (org-babel-load-file "~/.emacs.d/PRIVATE.org")))
+
+(server-start)
 
