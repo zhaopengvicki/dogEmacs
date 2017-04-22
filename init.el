@@ -32,10 +32,21 @@
 (use-package cl)
 (require 'cl)
 
-(cl-letf (((symbol-function 'message) #'format))
-  (org-babel-load-file (expand-file-name "~/.emacs.d/README.org"))
-  (when (file-exists-p "~/.emacs.d/PRIVATE.org")
-    (org-babel-load-file "~/.emacs.d/PRIVATE.org")))
+(org-babel-load-file (expand-file-name "~/.emacs.d/README.org"))
 
-(server-start)
+;; (server-start)
 
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (org-plus-contrib use-package spacemacs-theme smart-mode-line rainbow-delimiters parinfer org-bullets magit hl-sexp highlight-symbol git-gutter-fringe expand-region counsel-projectile company clj-refactor))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

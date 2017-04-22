@@ -4,29 +4,23 @@
 * 样式设置
 ** Transparent
 #+BEGIN_SRC emacs-lisp
-  ;; (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-  ;; (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
+  (when (eq 'gnu/linux system-type)
+    (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
+    (add-to-list 'default-frame-alist '(alpha . (95 . 90))))
 #+END_SRC
 ** 字体设置
 *** 设置代码中使用的字体 
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
                       :family "Iosevka Term Slab"
-                      :height 135
+                      :height 110
                       :weight 'regular)
-#+END_SRC
-*** 配置Org-mode使用的字体
-使用一个中英文等宽的字体。
-#+BEGIN_SRC emacs-lisp
-  ;; (add-hook 'org-mode-hook
-  ;;           (lambda ()
-  ;;             (face-remap-add-relative 'default :family "Inziu Iosevka CL")))
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package spacemacs-theme
+  (use-package solarized-theme
     :init
-    (load-theme 'spacemacs-light t))
+    (load-theme 'solarized-dark t))
   #+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
@@ -84,20 +78,6 @@
         mouse-wheel-follow-mouse 't)
 #+END_SRC
 
-** 高亮当前S表达式
-#+BEGIN_SRC emacs-lisp
-  (defface hl-sexp-face
-    '((t (:inherit hl-line)))
-    "highlight face for hl-sexp mode."
-    :group 'faces)
-
-  (use-package hl-sexp
-    :init
-    (require 'hl-line)
-    (add-hook 'lisp-mode-hook 'hl-sexp-mode)
-    (add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
-    (add-hook 'clojure-mode-hook 'hl-sexp-mode))
-#+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
@@ -112,9 +92,6 @@
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
 #+END_SRC
-
-#+RESULTS:
-
 ** 关闭Tooltip
 #+BEGIN_SRC emacs-lisp
   (tooltip-mode -1)
@@ -125,61 +102,46 @@
 #+END_SRC
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
-  ;; (setq linum-format "%4d ")
-  ;; (add-hook 'prog-mode-hook 'linum-mode)
+  (setq linum-format "%4d ")
+  (add-hook 'prog-mode-hook 'linum-mode)
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
   (setq-default indent-tabs-mode nil)
 #+END_SRC
-
 ** 高亮匹配的括号。
 #+BEGIN_SRC emacs-lisp
   (show-paren-mode t)
 #+END_SRC
-
 ** 行高
 #+BEGIN_SRC emacs-lisp
-  (setq-default line-spacing 2)
+  (setq-default line-spacing 0)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode 1)
 #+END_SRC
-
 ** 空行标志
 #+BEGIN_SRC emacs-lisp
   (setq-default indicate-empty-lines t)
 #+END_SRC
-
-** 光标
-#+BEGIN_SRC emacs-lisp
-  ;; (setq-default cursor-type '(bar . 2))
-  ;; (blink-cursor-mode 1)
-#+END_SRC
-
 ** 使用ESC做退出按键
 #+BEGIN_SRC emacs-lisp
   (bind-key "<escape>" 'keyboard-escape-quit global-map)
 #+END_SRC
-
 ** 关闭electric-indent-mode
 #+BEGIN_SRC emacs-lisp
   (defun user/rebind-return-key ()
     (define-key global-map [remap newline] 'newline-and-indent))
-
   (electric-indent-mode -1)
-
   (add-hook 'prog-mode-hook 'user/rebind-return-key)
 #+END_SRC
 ** Eshell
 #+BEGIN_SRC emacs-lisp
   (defun user/eshell-init-keys ()
     (bind-key "C-l" 'eshell/clear eshell-mode-map))
-
   (add-hook 'eshell-mode-hook #'user/eshell-init-keys)
 #+END_SRC
-
 * GIT
 [[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
 #+BEGIN_SRC emacs-lisp
@@ -191,12 +153,6 @@
     (global-magit-file-mode t))
 #+END_SRC 
 
-[[https://github.com/syohex/emacs-git-gutter-fringe][Git gutter]] 提供了在fringe显示git状态的功能。
-#+BEGIN_SRC emacs-lisp
-  (use-package git-gutter-fringe
-    :init
-    (global-git-gutter-mode))
-#+END_SRC
 * 基础插件
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
@@ -355,7 +311,6 @@
      ("S-<tab>" . parinfer-smart-tab:dwim-left))
     :config
     (parinfer-strategy-add 'default 'newline-and-indent)
-    (add-hook 'parinfer-after-execute-hook 'hl-sexp-highlight)
     (parinfer-strategy-add 'instantly
       '(parinfer-smart-tab:dwim-right
         parinfer-smart-tab:dwim-right-or-complete
@@ -387,27 +342,15 @@
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
 
-*** 选择使用的方案
-#+BEGIN_SRC emacs-lisp
-  (setq user/use-clojure-env 'cider)
-#+END_SRC
-*** Replique(Optional)
-#+BEGIN_SRC emacs-lisp
-  (when (eq user/use-clojure-env 'replique)
-    (add-to-list 'load-path "~/.emacs.d/replique.el")
-    (require 'replique)
-    (add-hook 'clojure-mode-hook 'replique/minor-mode))
-#+END_SRC
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
-  (when (eq user/use-clojure-env 'cider)
-    (use-package cider
-      :init
-      (setq cider-lein-command "/usr/local/bin/lein")
-      (setq cider-boot-command "/usr/local/bin/boot")
-      (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-      (setq cider-use-overlays t)))
+  (use-package cider
+    :init
+    (setq cider-lein-command "/usr/local/bin/lein")
+    (setq cider-boot-command "/usr/local/bin/boot")
+    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+    (setq cider-use-overlays t))
 #+END_SRC
 
 *** clj-refactor: 重构工具
@@ -420,12 +363,11 @@
     (unbind-key "<tab>" yas-minor-mode-map)
     (unbind-key "TAB" yas-minor-mode-map))
 
-  (when (eq user/use-clojure-env 'cider)
-    (use-package clj-refactor
-      :init
-      (cljr-add-keybindings-with-prefix "C-,")
-      (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-      (add-hook 'clojure-mode-hook #'yas-minor-mode)))
+  (use-package clj-refactor
+    :init
+    (cljr-add-keybindings-with-prefix "C-,")
+    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+    (add-hook 'clojure-mode-hook #'yas-minor-mode))
 #+END_SRC
 
 * Org相关
@@ -443,7 +385,6 @@
     :init
     (add-hook 'org-mode-hook 'org-bullets-mode))
 #+END_SRC
-
 ** 导出markdown
 #+BEGIN_SRC emacs-lisp
   (eval-after-load "org"
