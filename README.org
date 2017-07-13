@@ -8,26 +8,28 @@
   ;; (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
 #+END_SRC
 ** 字体设置
-*** 设置代码中使用的字体 
+*** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
-                      :family "Iosevka Term Slab"
-                      :height 135
-                      :weight 'regular)
+                      :family "Fira Code"
+                      :height 145
+                      :weight 'light)
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
 #+BEGIN_SRC emacs-lisp
-  ;; (add-hook 'org-mode-hook
-  ;;           (lambda ()
-  ;;             (face-remap-add-relative 'default :family "Inziu Iosevka CL")))
+  (add-hook 'org-mode-hook
+            (lambda ()
+              (face-remap-add-relative 'default :family "Iosevka Slab")))
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package spacemacs-theme
-    :init
-    (load-theme 'spacemacs-light t))
-  #+END_SRC
+  (when window-system
+    (use-package darktooth-theme
+      :ensure t
+      :init
+      (load-theme 'darktooth t)))
+#+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
   (use-package smart-mode-line
@@ -37,6 +39,19 @@
     (sml/apply-theme 'respectful))
 #+END_SRC
 * 基本设置
+** Dvorak
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-z") help-map)
+  (global-set-key (kbd "C-h") ctl-x-map)
+#+END_SRC
+** scratch初始化信息
+#+BEGIN_SRC emacs-lisp
+  (setq initial-scratch-message ";; Time is limited, do not waste it!")
+#+END_SRC
+** 保存时删除空行
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC
 ** 编码
 始终使用UTF-8编码。
 #+BEGIN_SRC emacs-lisp
@@ -94,9 +109,10 @@
   (use-package hl-sexp
     :init
     (require 'hl-line)
-    (add-hook 'lisp-mode-hook 'hl-sexp-mode)
-    (add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
-    (add-hook 'clojure-mode-hook 'hl-sexp-mode))
+    ;(add-hook 'lisp-mode-hook 'hl-sexp-mode)
+    ;(add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
+    ;(add-hook 'clojure-mode-hook 'hl-sexp-mode)
+    )
 #+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
@@ -105,15 +121,13 @@
 
 ** 去掉窗体中不必要的地方
 #+BEGIN_SRC emacs-lisp
-  (setq frame-title-format "E M A C S")
+  (setq frame-title-format "")
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
   (tool-bar-mode -1)
-  (menu-bar-mode -1)
+  (menu-bar-mode 1)
   (scroll-bar-mode -1)
 #+END_SRC
-
-#+RESULTS:
 
 ** 关闭Tooltip
 #+BEGIN_SRC emacs-lisp
@@ -125,7 +139,7 @@
 #+END_SRC
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
-  ;; (setq linum-format "%4d ")
+  (setq linum-format "%4d ")
   ;; (add-hook 'prog-mode-hook 'linum-mode)
 #+END_SRC
 ** 使用空格而不是TAB
@@ -189,13 +203,6 @@
     :init
     (setq magit-completing-read-function 'ivy-completing-read)
     (global-magit-file-mode t))
-#+END_SRC 
-
-[[https://github.com/syohex/emacs-git-gutter-fringe][Git gutter]] 提供了在fringe显示git状态的功能。
-#+BEGIN_SRC emacs-lisp
-  (use-package git-gutter-fringe
-    :init
-    (global-git-gutter-mode))
 #+END_SRC
 * 基础插件
 ** Expand Region: 快速选择
@@ -238,6 +245,7 @@
 
 #+BEGIN_SRC emacs-lisp
   (defun user/company-clojure-init ()
+    (bind-key "TAB" 'company-indent-or-complete-common clojure-mode-map)
     (bind-key "<tab>" 'company-indent-or-complete-common clojure-mode-map))
 
   (defun user/company-cider-repl-init ()
@@ -260,6 +268,8 @@
     (add-hook 'clojure-mode-hook #'user/company-clojure-init)
     (add-hook 'eshell-mode-hook #'user/company-eshell-init)
     (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
+    (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
+    (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
     (setq company-idle-delay nil)
     (global-company-mode))
 #+END_SRC
@@ -280,10 +290,11 @@
     :bind
     (("C-c g" . counsel-git)
      ("C-c G" . counsel-git-grep)
-     ("C-c s" . swiper)
+     ("C-c C-s" . swiper)
      ("C-c m" . counsel-imenu)
      ("C-c A" . counsel-ag)
      :map ivy-minibuffer-map
+     ("<tab>" . ivy-alt-done)
      ("<escape>" . minibuffer-keyboard-quit)
      ("C-r" . counsel-expression-history)))
 
@@ -347,27 +358,44 @@
 | C-b (光标位于空行时) | 上一个有意义的缩进 |
 
 #+BEGIN_SRC emacs-lisp
-  (use-package parinfer
-    :bind
-    (("C-'" . parinfer-toggle-mode)
-     ("M-r" . parinfer-raise-sexp)
-     ("<tab>" . parinfer-smart-tab:dwim-right-or-complete)
-     ("S-<tab>" . parinfer-smart-tab:dwim-left))
-    :config
-    (parinfer-strategy-add 'default 'newline-and-indent)
-    (add-hook 'parinfer-after-execute-hook 'hl-sexp-highlight)
-    (parinfer-strategy-add 'instantly
-      '(parinfer-smart-tab:dwim-right
-        parinfer-smart-tab:dwim-right-or-complete
-        parinfer-smart-tab:dwim-left))
-    :init
-    (require 'ediff)
-    (setq ediff-window-setup-function 'ediff-setup-windows-plain)
-    (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
-    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
-    (setq parinfer-auto-switch-indent-mode-when-closing t)
-    (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
-    (add-hook 'clojure-mode-hook 'parinfer-mode))
+  ;; (use-package parinfer
+  ;;   :bind
+  ;;   (("C-'" . parinfer-toggle-mode)
+  ;;    ("M-r" . parinfer-raise-sexp)
+  ;;    ("<tab>" . parinfer-smart-tab:dwim-right-or-complete)
+  ;;    ("S-<tab>" . parinfer-smart-tab:dwim-left))
+  ;;   :config
+  ;;   (parinfer-strategy-add 'default 'newline-and-indent)
+  ;;   ;; (add-hook 'parinfer-after-execute-hook 'hl-sexp-highlight)
+  ;;   (parinfer-strategy-add 'instantly
+  ;;     '(parinfer-smart-tab:dwim-right
+  ;;       parinfer-smart-tab:dwim-right-or-complete
+  ;;       parinfer-smart-tab:dwim-left))
+  ;;   :init
+  ;;   (require 'ediff)
+  ;;   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  ;;   (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
+  ;;   (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
+  ;;   (setq parinfer-auto-switch-indent-mode-when-closing t)
+  ;;   (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
+  ;;   (add-hook 'clojure-mode-hook 'parinfer-mode))
+
+  (add-to-list 'load-path "~/sandbox/parinfer-mode")
+
+  (require 'parinfer)
+  (require 'ediff)
+
+  (parinfer-strategy-add 'default 'newline-and-indent)
+  (parinfer-strategy-add 'instantly
+    '(parinfer-smart-tab:dwim-right
+      parinfer-smart-tab:dwim-right-or-complete
+      parinfer-smart-tab:dwim-left))
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
+  (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
+  (setq parinfer-auto-switch-indent-mode-when-closing t)
+  (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
+  (add-hook 'clojure-mode-hook 'parinfer-mode)
 #+END_SRC
 
 ** Clojure相关
@@ -375,39 +403,30 @@
 | 按键    | 功能                      |
 |---------+---------------------------|
 | C-c SPC | 格式化当前TOP-LEVEL表达式 |
-
 *** Clojure-mode
 #+BEGIN_SRC emacs-lisp
   (use-package clojure-mode
     :config
     (define-clojure-indent
-      (defui  '(1 :form :defn)))
+      (defui  '(1 :form :defn))
+      (assoc  '(1))
+      (match  '(1)))
     :init
     (add-hook 'clojure-mode-hook #'eldoc-mode)
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
-
-*** 选择使用的方案
-#+BEGIN_SRC emacs-lisp
-  (setq user/use-clojure-env 'cider)
-#+END_SRC
-*** Replique(Optional)
-#+BEGIN_SRC emacs-lisp
-  (when (eq user/use-clojure-env 'replique)
-    (add-to-list 'load-path "~/.emacs.d/replique.el")
-    (require 'replique)
-    (add-hook 'clojure-mode-hook 'replique/minor-mode))
-#+END_SRC
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
-  (when (eq user/use-clojure-env 'cider)
-    (use-package cider
-      :init
-      (setq cider-lein-command "/usr/local/bin/lein")
-      (setq cider-boot-command "/usr/local/bin/boot")
-      (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-      (setq cider-use-overlays t)))
+  (use-package cider
+    :defer t
+    :bind
+    (:map cider-mode-map
+          ("C-c C-i" . cider-inspect-last-result))
+    :init
+    (setq cider-lein-command "/usr/local/bin/lein")
+    (setq cider-boot-command "/usr/local/bin/boot")
+    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))"))
 #+END_SRC
 
 *** clj-refactor: 重构工具
@@ -420,14 +439,21 @@
     (unbind-key "<tab>" yas-minor-mode-map)
     (unbind-key "TAB" yas-minor-mode-map))
 
-  (when (eq user/use-clojure-env 'cider)
-    (use-package clj-refactor
-      :init
-      (cljr-add-keybindings-with-prefix "C-,")
-      (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-      (add-hook 'clojure-mode-hook #'yas-minor-mode)))
+  (use-package clj-refactor
+    :init
+    (cljr-add-keybindings-with-prefix "C-,")
+    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+    (add-hook 'clojure-mode-hook #'yas-minor-mode))
 #+END_SRC
 
+*** sayid: Trace Debugger
+#+BEGIN_SRC emacs-lisp
+  (use-package sayid
+    :init
+    (add-to-list 'cider-jack-in-dependencies '("com.billpiel/sayid" "0.0.15"))
+    (eval-after-load 'clojure-mode
+      '(sayid-setup-package)))
+#+END_SRC
 * Org相关
 ** 执行脚本
 #+BEGIN_SRC emacs-lisp
@@ -464,4 +490,11 @@
   (use-package org-plus-contrib)
 #+END_SRC
 
+* FIX
+#+BEGIN_SRC emacs-lisp
+  (defun insert-template-clojure-comment ()
+    (interactive)
+    (insert ";; ================================================================================\n;; \n;; ================================================================================\n"))
 
+  (global-set-key (kbd "C-h M-;") 'insert-template-clojure-comment)
+#+END_SRC
