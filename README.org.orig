@@ -12,6 +12,7 @@
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
+<<<<<<< HEAD
                       :family "Fira Code"
                       :height 145
                       :weight 'light)
@@ -31,6 +32,18 @@
       :init
       (load-theme 'darktooth t)))
 #+END_SRC
+=======
+                      :family "Iosevka Term Slab"
+                      :height 110
+                      :weight 'regular)
+#+END_SRC
+** 主题
+#+BEGIN_SRC emacs-lisp
+  (use-package solarized-theme
+    :init
+    (load-theme 'solarized-dark t))
+  #+END_SRC
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 ** Powerline
 #+BEGIN_SRC emacs-lisp
   (use-package smart-mode-line
@@ -100,6 +113,7 @@
         mouse-wheel-follow-mouse 't)
 #+END_SRC
 
+<<<<<<< HEAD
 ** 高亮当前S表达式
 #+BEGIN_SRC emacs-lisp
   (defface hl-sexp-face
@@ -115,6 +129,8 @@
     ;(add-hook 'clojure-mode-hook 'hl-sexp-mode)
     )
 #+END_SRC
+=======
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
@@ -129,6 +145,10 @@
   (menu-bar-mode 1)
   (scroll-bar-mode -1)
 #+END_SRC
+<<<<<<< HEAD
+
+=======
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 ** 关闭Tooltip
 #+BEGIN_SRC emacs-lisp
   (tooltip-mode -1)
@@ -140,7 +160,11 @@
 ** 开启行号
 #+BEGIN_SRC emacs-lisp
   (setq linum-format "%4d ")
+<<<<<<< HEAD
   ;; (add-hook 'prog-mode-hook 'linum-mode)
+=======
+  (add-hook 'prog-mode-hook 'linum-mode)
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
@@ -188,8 +212,12 @@
     :init
     (setq magit-completing-read-function 'ivy-completing-read)
     (global-magit-file-mode t))
+<<<<<<< HEAD
+#+END_SRC
+=======
 #+END_SRC 
 
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 * 基础插件
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
@@ -344,6 +372,46 @@
 | C-b (光标位于空行时) | 上一个有意义的缩进 |
 
 #+BEGIN_SRC emacs-lisp
+<<<<<<< HEAD
+  ;; (use-package parinfer
+  ;;   :bind
+  ;;   (("C-'" . parinfer-toggle-mode)
+  ;;    ("M-r" . parinfer-raise-sexp)
+  ;;    ("<tab>" . parinfer-smart-tab:dwim-right-or-complete)
+  ;;    ("S-<tab>" . parinfer-smart-tab:dwim-left))
+  ;;   :config
+  ;;   (parinfer-strategy-add 'default 'newline-and-indent)
+  ;;   ;; (add-hook 'parinfer-after-execute-hook 'hl-sexp-highlight)
+  ;;   (parinfer-strategy-add 'instantly
+  ;;     '(parinfer-smart-tab:dwim-right
+  ;;       parinfer-smart-tab:dwim-right-or-complete
+  ;;       parinfer-smart-tab:dwim-left))
+  ;;   :init
+  ;;   (require 'ediff)
+  ;;   (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  ;;   (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
+  ;;   (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
+  ;;   (setq parinfer-auto-switch-indent-mode-when-closing t)
+  ;;   (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
+  ;;   (add-hook 'clojure-mode-hook 'parinfer-mode))
+
+  (add-to-list 'load-path "~/sandbox/parinfer-mode")
+
+  (require 'parinfer)
+  (require 'ediff)
+
+  (parinfer-strategy-add 'default 'newline-and-indent)
+  (parinfer-strategy-add 'instantly
+    '(parinfer-smart-tab:dwim-right
+      parinfer-smart-tab:dwim-right-or-complete
+      parinfer-smart-tab:dwim-left))
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
+  (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
+  (setq parinfer-auto-switch-indent-mode-when-closing t)
+  (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
+  (add-hook 'clojure-mode-hook 'parinfer-mode)
+=======
   (use-package parinfer
     :bind
     (("C-'" . parinfer-toggle-mode)
@@ -364,6 +432,7 @@
     (setq parinfer-auto-switch-indent-mode-when-closing t)
     (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
     (add-hook 'clojure-mode-hook 'parinfer-mode))
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 #+END_SRC
 
 ** Clojure相关
@@ -383,16 +452,30 @@
     (add-hook 'clojure-mode-hook #'eldoc-mode)
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
+<<<<<<< HEAD
+=======
 
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
   (use-package cider
+<<<<<<< HEAD
+    :defer t
+    :bind
+    (:map cider-mode-map
+          ("C-c C-i" . cider-inspect-last-result))
+    :init
+    (setq cider-lein-command "/usr/local/bin/lein")
+    (setq cider-boot-command "/usr/local/bin/boot")
+    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))"))
+=======
     :init
     (setq cider-lein-command "/usr/local/bin/lein")
     (setq cider-boot-command "/usr/local/bin/boot")
     (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
     (setq cider-use-overlays t))
+>>>>>>> 1a8e2c6951f4779aa106740283cff20a79b50961
 #+END_SRC
 
 *** clj-refactor: 重构工具
