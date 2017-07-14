@@ -122,7 +122,7 @@
 
 ** 去掉窗体中不必要的地方
 #+BEGIN_SRC emacs-lisp
-  (setq frame-title-format "")
+  (setq frame-title-format "EMACS")
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
   (tool-bar-mode -1)
@@ -188,7 +188,7 @@
     :init
     (setq magit-completing-read-function 'ivy-completing-read)
     (global-magit-file-mode t))
-#+END_SRC 
+#+END_SRC
 
 * 基础插件
 ** Expand Region: 快速选择
