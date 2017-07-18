@@ -12,8 +12,8 @@
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
   (set-face-attribute 'default nil
-                      :family "Fira Code"
-                      :height 145
+                      :family "Source Code Pro"
+                      :height 130
                       :weight 'light)
 #+END_SRC
 *** 配置Org-mode使用的字体
@@ -31,13 +31,20 @@
       :init
       (load-theme 'darktooth t)))
 #+END_SRC
+** Icon
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+    :ensure t)
+#+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
-  (use-package smart-mode-line
+  (use-package spaceline
     :init
-    (setq sml/no-confirm-load-theme t)
-    (sml/setup)
-    (sml/apply-theme 'respectful))
+    (require 'spaceline-config)
+    (spaceline-emacs-theme))
+
+  (use-package spaceline-all-the-icons
+    :init (spaceline-all-the-icons-theme))
 #+END_SRC
 * 基本设置
 ** Dvorak
@@ -191,6 +198,42 @@
 #+END_SRC
 
 * 基础插件
+** 目录树neotree
+#+BEGIN_SRC emacs-lisp
+  (defun neotree-project-dir-toggle ()
+    "Open NeoTree using the project root, using find-file-in-project,
+  or the current buffer directory."
+    (interactive)
+    (let ((project-dir
+           (ignore-errors
+             ;;; Pick one: projectile or find-file-in-project
+             ; (projectile-project-root)
+             (ffip-project-root)))
+
+          (file-name (buffer-file-name))
+          (neo-smart-open t))
+      (if (and (fboundp 'neo-global--window-exists-p)
+               (neo-global--window-exists-p))
+          (neotree-hide)
+        (progn
+          (neotree-show)
+          (if project-dir
+              (neotree-dir project-dir))
+          (if file-name
+              (neotree-find file-name))))))
+
+  (use-package neotree
+    :ensure t
+    :init
+    (setq neo-theme
+          (if (display-graphic-p)
+              'icons
+            'arrow))
+    (setq neo-window-fixed-size nil)
+    (setq neo-window-width 30)
+    :bind
+    (("C-h t" . neotree-project-dir-toggle)))
+#+END_SRC
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
 | 按键 | 功能         |
@@ -360,7 +403,7 @@
     (require 'ediff)
     (setq ediff-window-setup-function 'ediff-setup-windows-plain)
     (setq parinfer-lighters '(" Parinfer:Ind" . " Parinfer:Par"))
-    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit))
+    (setq parinfer-extensions '(defaults pretty-parens smart-tab smart-yank paredit one))
     (setq parinfer-auto-switch-indent-mode-when-closing t)
     (add-hook 'emacs-lisp-mode-hook 'parinfer-mode)
     (add-hook 'clojure-mode-hook 'parinfer-mode))
@@ -419,6 +462,13 @@
     (add-to-list 'cider-jack-in-dependencies '("com.billpiel/sayid" "0.0.15"))
     (eval-after-load 'clojure-mode
       '(sayid-setup-package)))
+#+END_SRC
+*** Monroe
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package monroe
+  ;;   :ensure t
+  ;;   :init
+  ;;   (add-hook 'clojure-mode-hook 'clojure-enable-monroe))
 #+END_SRC
 * Org相关
 ** 执行脚本
