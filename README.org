@@ -2,33 +2,24 @@
 #+AUTHOR: Shi Tianshu
 
 * 样式设置
-** Transparent
+** 界面透明
 #+BEGIN_SRC emacs-lisp
-  ;; (when (eq 'gnu/linux system-type))
-  ;; (set-frame-parameter (selected-frame) 'alpha '(95 . 90))
-  ;; (add-to-list 'default-frame-alist '(alpha . (95 . 90)))
-
+  (set-frame-parameter (selected-frame) 'alpha '(100 . 95))
+  (add-to-list 'default-frame-alist '(alpha . (100 . 95)))
 #+END_SRC
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-face-attribute 'default nil
-                      :family "Source Code Pro"
-                      :height 135
-                      :weight 'regular)
+  (set-default-font "Inconsolata-14")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
 #+BEGIN_SRC emacs-lisp
   (add-hook 'org-mode-hook
             (lambda ()
-              (face-remap-add-relative 'default :family "Iosevka Slab")))
-#+END_SRC
-** 主题
-#+BEGIN_SRC emacs-lisp
-  (use-package zenburn-theme
-    :init
-    (load-theme 'zenburn t))
+              (face-remap-add-relative 'default
+                                       :family "Iosevka Slab"
+                                       :height 160)))
 #+END_SRC
 ** Icon
 #+BEGIN_SRC emacs-lisp
@@ -37,23 +28,60 @@
 #+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
-  ;; (use-package spaceline
-  ;;   :init
-  ;;   (require 'spaceline-config)
-  ;;   (spaceline-emacs-theme))
-
-  ;; (use-package spaceline-all-the-icons
-  ;;   :init (spaceline-all-the-icons-theme))
+  (use-package telephone-line
+    :ensure t
+    :init
+    (setq telephone-line-lhs
+          '((accent . (telephone-line-vc-segment))
+            (nil . (telephone-line-buffer-segment))))
+    (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+          telephone-line-secondary-left-separato 'telephone-line-cubed-hollow-left
+          telephone-line-primary-right-separator 'telephone-line-cubed-right
+          telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+    (telephone-line-mode))
+#+END_SRC
+** 主题
+#+BEGIN_SRC emacs-lisp
+  (setq ns-use-srgb-colorspace nil)
+  (load-theme 'darktooth t)
 #+END_SRC
 * 基本设置
+** 设置一个快捷键用来重新加载配置文件
+#+BEGIN_SRC emacs-lisp
+  (defun user/load-configuration ()
+    (interactive)
+    (org-babel-load-file "~/.emacs.d/README.org"))
+
+  (bind-key "C-x p" 'user/load-configuration)
+#+END_SRC
+** 去掉窗体中不必要的地方
+#+BEGIN_SRC emacs-lisp
+  (setq frame-title-format " %* %b %I")
+  (setq ring-bell-function 'ignore)
+  (setq inhibit-startup-screen t)
+  (menu-bar-mode -1)
+  (when (display-graphic-p)
+    (tool-bar-mode -1)
+    ;; (menu-bar-mode 1)
+    (scroll-bar-mode -1))
+#+END_SRC
 ** Dvorak
 #+BEGIN_SRC emacs-lisp
-  (global-set-key (kbd "C-z") help-map)
+  (global-set-key (kbd "C-@") help-map)
   (global-set-key (kbd "C-h") ctl-x-map)
 #+END_SRC
 ** scratch初始化信息
 #+BEGIN_SRC emacs-lisp
-  (setq initial-scratch-message ";; Time is limited, do not waste it!")
+  (setq initial-scratch-message ";; Time is limited!\n")
+#+END_SRC
+** Nyan-mode
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package nyan-mode
+  ;;   :ensure t
+  ;;   :init
+  ;;   (nyan-mode)
+  ;;   (nyan-start-animation)
+  ;;   (nyan-toggle-wavy-trail))
 #+END_SRC
 ** 保存时删除空行
 #+BEGIN_SRC emacs-lisp
@@ -74,6 +102,13 @@
 ** 关闭fringe
 #+BEGIN_SRC emacs-lisp
   (fringe-mode)
+#+END_SRC
+** 只有一个窗口时居中
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package centered-window-mode
+  ;;   :ensure t
+  ;;   :init
+  ;;   (centered-window-mode))
 #+END_SRC
 ** MacOS 的一些配置
 使用 =option= 作为 =Meta= key.
@@ -110,6 +145,10 @@
         mouse-wheel-follow-mouse 't)
 #+END_SRC
 
+** 光标
+#+BEGIN_SRC emacs-lisp
+  ;; (add-hook 'prog-mode-hook (lambda () (setq-local cursor-type 'bar)))
+#+END_SRC
 ** 高亮当前S表达式
 #+BEGIN_SRC emacs-lisp
   ;; (defface hl-sexp-face
@@ -132,18 +171,6 @@
 #+BEGIN_SRC emacs-lisp
   (fset 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
-
-** 去掉窗体中不必要的地方
-#+BEGIN_SRC emacs-lisp
-  (setq frame-title-format "EMACS")
-  (setq ring-bell-function 'ignore)
-  (setq inhibit-startup-screen t)
-  (menu-bar-mode -1)
-  (when (display-graphic-p)
-    (tool-bar-mode -1)
-    ;; (menu-bar-mode 1)
-    (scroll-bar-mode -1))
-#+END_SRC
 ** 关闭Tooltip
 #+BEGIN_SRC emacs-lisp
   (tooltip-mode -1)
@@ -151,13 +178,6 @@
 ** 始终开启列号
 #+BEGIN_SRC emacs-lisp
   (setq column-number-mode t)
-#+END_SRC
-** 开启行号
-#+BEGIN_SRC emacs-lisp
-  ;; (setq nlinum-format "%4d ")
-  ;; (use-package nlinum
-  ;;   :init
-  ;;   (remove-hook 'prog-mode-hook 'nlinum-mode))
 #+END_SRC
 ** 使用空格而不是TAB
 #+BEGIN_SRC emacs-lisp
@@ -173,7 +193,7 @@
 #+END_SRC
 ** 行高
 #+BEGIN_SRC emacs-lisp
-  (setq-default line-spacing 0)
+  (setq-default line-spacing 2)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
@@ -205,6 +225,15 @@
   (unless window-system
     (xterm-mouse-mode t))
 #+END_SRC
+** HideShow
+#+BEGIN_SRC emacs-lisp
+  (use-package hideshowvis)
+  (defun user/init-hs-mode ()
+    (hs-minor-mode t)
+    (hideshowvis-symbols))
+  (add-hook 'prog-mode-hook #'user/init-hs-mode)
+  (bind-key "C-<return>" 'hs-toggle-hiding prog-mode-map)
+#+END_SRC
 * GIT
 [[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
 #+BEGIN_SRC emacs-lisp
@@ -216,6 +245,15 @@
     (global-magit-file-mode t))
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+  (use-package git-gutter-fringe+
+    :init
+    (global-git-gutter-mode t))
+#+END_SRC
+* RESTCLIENT
+#+BEGIN_SRC emacs-lisp
+  (use-package restclient)
+#+END_SRC
 * 基础插件
 ** 窗口管理
 #+BEGIN_SRC emacs-lisp
@@ -255,7 +293,7 @@
     :init
     (setq neo-theme
           (if (display-graphic-p)
-              'icons
+              'arrow
             'arrow))
     (setq neo-window-fixed-size nil)
     (setq neo-window-width 30)
@@ -305,6 +343,10 @@
     (bind-key "TAB" 'company-indent-or-complete-common clojure-mode-map)
     (bind-key "<tab>" 'company-indent-or-complete-common clojure-mode-map))
 
+  (defun user/company-ocaml-init ()
+    (bind-key "TAB" 'company-indent-or-complete-common tuareg-mode-map)
+    (bind-key "<tab>" 'company-indent-or-complete-common tuareg-mode-map))
+
   (defun user/company-cider-repl-init ()
     (bind-key "<tab>" 'company-complete-common cider-repl-mode-map))
 
@@ -322,6 +364,7 @@
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
+    (add-hook 'tuareg-mode-hook #'user/company-ocaml-init)
     (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
     (add-hook 'clojure-mode-hook #'user/company-clojure-init)
     (add-hook 'eshell-mode-hook #'user/company-eshell-init)
@@ -338,7 +381,6 @@
 |-------------------+----------------------------------|
 | C-c g             | GIT项目中的文件搜索              |
 | C-c G             | GIT项目中的文件内容搜索          |
-| C-c s             | 当前BUFFER中内容搜索             |
 | C-c m             | IMENU                            |
 | C-c a             | AG搜索                           |
 | C-M-j(查找文件中) | 提交当前内容，而不从候选项中选择 |
@@ -348,7 +390,7 @@
     :bind
     (("C-c g" . counsel-git)
      ("C-c G" . counsel-git-grep)
-     ("C-c C-s" . swiper)
+     ("C-s" . swiper)
      ("C-c m" . counsel-imenu)
      ("C-c A" . counsel-ag)
      :map ivy-minibuffer-map
@@ -363,7 +405,11 @@
 
   (use-package ivy
     :init
-    (ivy-mode 1))
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-use-selectable-prompt t)
+    (ivy-mode 1)
+    :bind
+    (("<C-escape>" . ivy-resume)))
 #+END_SRC
 
 ** Highlight Symbol: 高亮文档中光标处的符号
@@ -399,14 +445,97 @@
 
 * Clojure 开发
 ** 高亮匹配的括号。
+** Clojure相关
+| 按键    | 功能                      |
+|---------+---------------------------|
+| C-c SPC | 格式化当前TOP-LEVEL表达式 |
+*** Clojure-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package clojure-mode
+    :config
+    (define-clojure-indent
+      (defui  '(1 :form :defn))
+      (assoc  '(1))
+      (match  '(1)))
+    :init
+    (add-hook 'clojure-mode-hook #'eldoc-mode)
+    (add-hook 'clojure-mode-hook #'subword-mode))
+#+END_SRC
+
+*** Cider: Clojure交互式开发环境
+[[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
+#+BEGIN_SRC emacs-lisp
+  (use-package cider
+    :bind
+    (:map cider-mode-map
+          ("C-c <tab>" . cider-inspect-last-result))
+    :init
+    (setq cider-prompt-for-symbol nil)
+    (setq cider-lein-command "/usr/local/bin/lein")
+    (setq cider-boot-command "/usr/local/bin/boot")
+    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+    (setq nrepl-use-ssh-fallback-for-remote-hosts nil)
+    (setq cider-use-overlays 'both))
+#+END_SRC
+
+*** clj-refactor: 重构工具
+[[https://github.com/clojure-emacs/clj-refactor.el/wiki][clj-refactor的功能见这里]]
+#+BEGIN_SRC emacs-lisp
+  (use-package yasnippet
+    :init
+    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+    :config
+    (unbind-key "<tab>" yas-minor-mode-map)
+    (unbind-key "TAB" yas-minor-mode-map))
+
+  (use-package clj-refactor
+    :init
+    (cljr-add-keybindings-with-prefix "C-,")
+    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
+    (add-hook 'clojure-mode-hook #'yas-minor-mode))
+#+END_SRC
+
+*** sayid: Trace Debugger
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package sayid
+  ;;   :init
+  ;;   (add-to-list 'cider-jack-in-dependencies '("com.billpiel/sayid" "0.0.15"))
+  ;;   (eval-after-load 'clojure-mode
+  ;;     '(sayid-setup-package)))
+#+END_SRC
+*** Monroe
+#+BEGIN_SRC emacs-lisp
+  ;; (defun monroe/eval-last-sexp ()
+  ;;   (interactive)
+  ;;   (call-interactively 'set-mark-command)
+  ;;   (backward-sexp)
+  ;;   (call-interactively 'monroe-eval-region)
+  ;;   (forward-sexp)
+  ;;   (call-ineractively 'set-mark-command))
+
+  ;; (use-package monroe
+  ;;   :ensure t
+  ;;   :bind
+  ;;   (("C-c C-e" . monroe/eval-last-sexp)))
+#+END_SRC
+*** Hugsql-ghosts
+#+BEGIN_SRC emacs-lisp
+  (use-package hugsql-ghosts
+    :ensure t
+    :init
+    (setq hugsql-ghosts-newline-before-docstrings t)
+    (add-hook 'cider-mode-hook 'hugsql-ghosts-install-hook)
+    :config
+    (set-face-attribute 'hugsql-ghosts-defn nil :foreground "font-lock-comment-face" :background nil))
+#+END_SRC
 
 ** Lisp 基础
 *** 彩虹括号
 #+BEGIN_SRC emacs-lisp
-  (use-package rainbow-delimiters
-    :ensure t
-    :init
-    (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+  ;; (use-package rainbow-delimiters
+  ;;   :ensure t
+  ;;   :init
+  ;;   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
 #+END_SRC
 
 *** Parinfer: S表达式结构化编辑
@@ -445,10 +574,20 @@
 #+BEGIN_SRC emacs-lisp
   (use-package paredit
     :ensure t
+    :bind
+    ("M-s" . paredit-slice-sexp)
     :init
+    (setq paredit-space-for-delimiter-predicates nil)
     (add-hook 'clojure-mode-hook 'paredit-mode)
-    (add-hook 'clojure-repl-mode-hook 'paredit-mode)
+    (add-hook 'cider-repl-mode-hook 'paredit-mode)
     (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
+
+  ;; (use-package aggressive-indent
+  ;;   :ensure t
+  ;;   :init
+  ;;   (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
+  ;;   (add-hook 'cider-repl-mode-hook 'aggressive-indent-mode)
+  ;;   (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
 #+END_SRC
 
 *** Lispy
@@ -456,78 +595,22 @@
   ;; (use-package lispy
   ;;   :init
   ;;   (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
-  ;;   (add-hook 'clojure-mode-hook 'lispy-mode))
-#+END_SRC
-** Clojure相关
-| 按键    | 功能                      |
-|---------+---------------------------|
-| C-c SPC | 格式化当前TOP-LEVEL表达式 |
-*** Clojure-mode
-#+BEGIN_SRC emacs-lisp
-  (use-package clojure-mode
-    :config
-    (define-clojure-indent
-      (defui  '(1 :form :defn))
-      (assoc  '(1))
-      (match  '(1)))
-    :init
-    (add-hook 'clojure-mode-hook #'eldoc-mode)
-    (add-hook 'clojure-mode-hook #'subword-mode))
-#+END_SRC
-
-*** Cider: Clojure交互式开发环境
-[[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
-#+BEGIN_SRC emacs-lisp
-  (use-package cider
-    :bind
-    (:map cider-mode-map
-          ("C-c <tab>" . cider-inspect-last-result))
-    :init
-    (setq cider-lein-command "/usr/local/bin/lein")
-    (setq cider-boot-command "/usr/local/bin/boot")
-    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-    (setq cider-use-overlays t))
-#+END_SRC
-
-*** clj-refactor: 重构工具
-[[https://github.com/clojure-emacs/clj-refactor.el/wiki][clj-refactor的功能见这里]]
-#+BEGIN_SRC emacs-lisp
-  (use-package yasnippet
-    :init
-    (setq yas-snippet-dirs '("~/.emacs.d/snippets"))
-    :config
-    (unbind-key "<tab>" yas-minor-mode-map)
-    (unbind-key "TAB" yas-minor-mode-map))
-
-  (use-package clj-refactor
-    :init
-    (cljr-add-keybindings-with-prefix "C-,")
-    (add-hook 'clojure-mode-hook #'clj-refactor-mode)
-    (add-hook 'clojure-mode-hook #'yas-minor-mode))
-#+END_SRC
-
-*** sayid: Trace Debugger
-#+BEGIN_SRC emacs-lisp
-  (use-package sayid
-    :init
-    (add-to-list 'cider-jack-in-dependencies '("com.billpiel/sayid" "0.0.15"))
-    (eval-after-load 'clojure-mode
-      '(sayid-setup-package)))
-#+END_SRC
-*** Monroe
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package monroe
-  ;;   :ensure t
-  ;;   :init
-  ;;   (add-hook 'clojure-mode-hook 'clojure-enable-monroe))
+  ;;   (add-hook 'clojure-mode-hook 'lispy-mode)
+  ;;   (add-hook 'cider-repl-mode-hook 'lispy-mode))
 #+END_SRC
 * Org相关
 ** 执行脚本
 #+BEGIN_SRC emacs-lisp
   (require 'ob-sh)
+  (require 'ob-emacs-lisp)
+  (require 'ob-python)
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((sh . t)))
+   '((sh . t)
+     (ditaa . t)
+     (clojure . t)
+     (emacs-lisp . t)
+     (python . t)))
 #+END_SRC
 ** 美化符号
 #+BEGIN_SRC emacs-lisp
@@ -556,11 +639,17 @@
   (use-package org-plus-contrib)
 #+END_SRC
 
+
 * FIX
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package paren-face
+  ;;   :init
+  ;;   (global-paren-face-mode t))
+#+END_SRC
 #+BEGIN_SRC emacs-lisp
   (defun insert-template-clojure-comment ()
     (interactive)
-    (insert ";; ================================================================================\n;; \n;; ================================================================================\n"))
+    (insert ";; --------------------------------------------------------------------------------\n;; \n;; --------------------------------------------------------------------------------\n"))
 
   (global-set-key (kbd "C-h M-;") 'insert-template-clojure-comment)
 #+END_SRC
