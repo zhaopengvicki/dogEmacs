@@ -21,11 +21,6 @@
                                        :family "Iosevka Slab"
                                        :height 160)))
 #+END_SRC
-** Icon
-#+BEGIN_SRC emacs-lisp
-  ;; (use-package all-the-icons
-  ;;   :ensure t)
-#+END_SRC
 ** Powerline
 #+BEGIN_SRC emacs-lisp
   (use-package telephone-line
@@ -42,12 +37,13 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (setq ns-use-srgb-colorspace t)
-  (setq kaolin-bold nil
-        kaolin-italic t
-        kaolin-underline t)
-  (setq kaolin-hl-line-colored t)
-  (load-theme 'kaolin-galaxy t)
+  (use-package kaolin-themes
+    :init
+    (setq kaolin-bold nil
+          kaolin-italic t
+          kaolin-underline t)
+    (setq kaolin-hl-line-colored t)
+    (load-theme 'kaolin-galaxy t))
 #+END_SRC
 * 基本设置
 ** 设置一个快捷键用来重新加载配置文件
