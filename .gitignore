@@ -10,3 +10,5 @@ PRIVATE.el
 PRIVATE.org
 *~
 ac-comphist.dat
+tramp
+*.data

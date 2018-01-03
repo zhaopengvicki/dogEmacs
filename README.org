@@ -4,13 +4,13 @@
 * 样式设置
 ** 界面透明
 #+BEGIN_SRC emacs-lisp
-  (set-frame-parameter (selected-frame) 'alpha '(100 . 95))
-  (add-to-list 'default-frame-alist '(alpha . (100 . 95)))
+  (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
+  (add-to-list 'default-frame-alist '(alpha . (100 . 90)))
 #+END_SRC
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Inconsolata-14")
+  (set-default-font "Inconsolata-15")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -33,7 +33,7 @@
     :init
     (setq telephone-line-lhs
           '((accent . (telephone-line-vc-segment))
-            (nil . (telephone-line-buffer-segment))))
+            (nil . (telephone-line-buffer-segment telephone-line-minor-mode-segment))))
     (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
           telephone-line-secondary-left-separato 'telephone-line-cubed-hollow-left
           telephone-line-primary-right-separator 'telephone-line-cubed-right
@@ -42,8 +42,12 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (setq ns-use-srgb-colorspace nil)
-  (load-theme 'darktooth t)
+  (setq ns-use-srgb-colorspace t)
+  (setq kaolin-bold nil
+        kaolin-italic t
+        kaolin-underline t)
+  (setq kaolin-hl-line-colored t)
+  (load-theme 'kaolin-galaxy t)
 #+END_SRC
 * 基本设置
 ** 设置一个快捷键用来重新加载配置文件
@@ -128,7 +132,10 @@
 ** 备份文件
 把备份文件放在 =~/.backup= 目录下，并且存更多的版本。
 #+BEGIN_SRC emacs-lisp
-  (setq backup-directory-alist `(("." . "~/.backup")))
+  (setq backup-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
 
   (setq backup-by-copying t)
 
@@ -144,10 +151,15 @@
         mouse-wheel-progressive-speed nil
         mouse-wheel-follow-mouse 't)
 #+END_SRC
-
 ** 光标
 #+BEGIN_SRC emacs-lisp
   ;; (add-hook 'prog-mode-hook (lambda () (setq-local cursor-type 'bar)))
+#+END_SRC
+** 缩进提示
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package indent-guide
+  ;;   :init
+  ;;   (add-hook 'prog-mode-hook #'indent-guide-mode))
 #+END_SRC
 ** 高亮当前S表达式
 #+BEGIN_SRC emacs-lisp
@@ -159,8 +171,8 @@
   ;; (use-package hl-sexp
   ;;   :init
   ;;   (require 'hl-line)
-  ;;   ;(add-hook 'lisp-mode-hook 'hl-sexp-mode)
-  ;;   ;(add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
+  ;;   (add-hook 'lisp-mode-hook 'hl-sexp-mode)
+  ;;   (add-hook 'emacs-lisp-mode-hook 'hl-sexp-mode)
   ;;   (add-hook 'clojure-mode-hook 'hl-sexp-mode))
 #+END_SRC
 ** 高亮当前行
@@ -193,7 +205,7 @@
 #+END_SRC
 ** 行高
 #+BEGIN_SRC emacs-lisp
-  (setq-default line-spacing 2)
+  (setq-default line-spacing 0)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
@@ -209,10 +221,10 @@
 #+END_SRC
 ** 关闭electric-indent-mode
 #+BEGIN_SRC emacs-lisp
-  (defun user/rebind-return-key ()
-    (define-key global-map [remap newline] 'newline-and-indent))
-  (electric-indent-mode -1)
-  (add-hook 'prog-mode-hook 'user/rebind-return-key)
+  ;; (defun user/rebind-return-key ()
+  ;;   (define-key global-map [remap newline] 'newline-and-indent))
+  ;; (electric-indent-mode -1)
+  ;; (add-hook 'prog-mode-hook 'user/rebind-return-key)
 #+END_SRC
 ** Eshell
 #+BEGIN_SRC emacs-lisp
@@ -225,6 +237,11 @@
   (unless window-system
     (xterm-mouse-mode t))
 #+END_SRC
+** 鼠标处理
+#+BEGIN_SRC emacs-lisp
+  (bind-key "<mouse-3>" 'kill-ring-save)
+  (bind-key "<mouse-4>" 'yank)
+#+END_SRC
 ** HideShow
 #+BEGIN_SRC emacs-lisp
   (use-package hideshowvis)
@@ -234,21 +251,14 @@
   (add-hook 'prog-mode-hook #'user/init-hs-mode)
   (bind-key "C-<return>" 'hs-toggle-hiding prog-mode-map)
 #+END_SRC
-* GIT
-[[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
+** Workspace
 #+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :bind
-    (("C-x M-g" . magit-dispatch-popup))
-    :init
-    (setq magit-completing-read-function 'ivy-completing-read)
-    (global-magit-file-mode t))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-  (use-package git-gutter-fringe+
-    :init
-    (global-git-gutter-mode t))
+  ;; (use-package perspeen
+  ;;   :ensure t
+  ;;   :init
+  ;;   (setq perspeen-use-tab t)
+  ;;   :config
+  ;;   (perspeen-mode))
 #+END_SRC
 * RESTCLIENT
 #+BEGIN_SRC emacs-lisp
@@ -264,7 +274,7 @@
     :init
     (setq aw-keys '(?a ?o ?e ?u ?i ?d ?h ?t ?n)))
 #+END_SRC
-** 目录树neotree
+** 目录树
 #+BEGIN_SRC emacs-lisp
   (defun neotree-project-dir-toggle ()
     "Open NeoTree using the project root, using find-file-in-project,
@@ -293,12 +303,36 @@
     :init
     (setq neo-theme
           (if (display-graphic-p)
-              'arrow
+              'ascii
             'arrow))
     (setq neo-window-fixed-size nil)
     (setq neo-window-width 30)
     :bind
     (("C-h t" . neotree-project-dir-toggle)))
+
+  ;; (use-package projectile-speedbar)
+
+  ;; (use-package sr-speedbar
+  ;;   :bind
+  ;;   (("C-h t" . sr-speedbar-toggle))
+  ;;   :init
+  ;;   (setq sr-speedbar-auto-refresh t)
+  ;;   (setq sr-speedbar-right-side nil)
+  ;;   (setq sr-speedbar-default-width 30)
+  ;;   (setq sr-speedbar-max-width 50)
+  ;;   :config
+  ;;   (speedbar-add-supported-extension ".cljc")
+  ;;   (speedbar-add-supported-extension ".clj")
+  ;;   (speedbar-add-supported-extension ".cljs"))
+
+  ;; (unbind-key "C-h C-s" global-map)
+
+  ;; (defun user/make-tag-and-save-buffer ()
+  ;;   (interactive)
+  ;;   (imenu--menubar-select imenu--rescan-item)
+  ;;   (call-interactively #'save-buffer))
+
+  ;; (bind-key "C-h C-s" 'user/make-tag-and-save-buffer)
 #+END_SRC
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
@@ -375,41 +409,20 @@
     (global-company-mode))
 #+END_SRC
 
-** IVY 补全
-相比 =ido= 和 =helm=, [[https://github.com/abo-abo/swiper][ivy]] 更简单和快速。
-| 按键              | 功能                             |
-|-------------------+----------------------------------|
-| C-c g             | GIT项目中的文件搜索              |
-| C-c G             | GIT项目中的文件内容搜索          |
-| C-c m             | IMENU                            |
-| C-c a             | AG搜索                           |
-| C-M-j(查找文件中) | 提交当前内容，而不从候选项中选择 |
+** Projectile: 项目文件导航
+使用[[https://github.com/bbatsov/projectile][projectile]] 插件。
+| 按键      | 功能             |
+|-----------+------------------|
+| C-c p f   | 切换项目中的文件 |
+| C-c p p   | 切换项目         |
+| C-c p s s | 项目中AG搜索     |
 
 #+BEGIN_SRC emacs-lisp
-  (use-package counsel
-    :bind
-    (("C-c g" . counsel-git)
-     ("C-c G" . counsel-git-grep)
-     ("C-s" . swiper)
-     ("C-c m" . counsel-imenu)
-     ("C-c A" . counsel-ag)
-     :map ivy-minibuffer-map
-     ("<tab>" . ivy-alt-done)
-     ("<escape>" . minibuffer-keyboard-quit)
-     ("C-r" . counsel-expression-history)))
-
-  (use-package counsel-projectile
+  (use-package projectile
+    :defer nil
     :init
-    (setq projectile-completion-system 'ivy)
-    (counsel-projectile-on))
-
-  (use-package ivy
-    :init
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-use-selectable-prompt t)
-    (ivy-mode 1)
-    :bind
-    (("<C-escape>" . ivy-resume)))
+    (setq projectile-keymap-prefix (kbd "C-z"))
+    (projectile-global-mode 1))
 #+END_SRC
 
 ** Highlight Symbol: 高亮文档中光标处的符号
@@ -427,20 +440,63 @@
     :init
     (add-hook 'prog-mode-hook #'highlight-symbol-mode))
 #+END_SRC
-
-** Projectile: 项目文件导航
-使用[[https://github.com/bbatsov/projectile][projectile]] 插件。
-| 按键      | 功能             |
-|-----------+------------------|
-| C-c p f   | 切换项目中的文件 |
-| C-c p p   | 切换项目         |
-| C-c p s s | 项目中AG搜索     |
+** IVY 补全
+相比 =ido= 和 =helm=, [[https://github.com/abo-abo/swiper][ivy]] 更简单和快速。
+| 按键              | 功能                             |
+|-------------------+----------------------------------|
+| C-c g             | GIT项目中的文件搜索              |
+| C-c G             | GIT项目中的文件内容搜索          |
+| C-c m             | IMENU                            |
+| C-c a             | AG搜索                           |
+| C-M-j(查找文件中) | 提交当前内容，而不从候选项中选择 |
 
 #+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :defer nil
+  (use-package counsel
+    :ensure t)
+
+  (use-package counsel-projectile
+    :ensure t
     :init
-    (projectile-global-mode 1))
+    (setq projectile-completion-system 'ivy))
+
+  (use-package ivy
+    :bind
+    (("C-c g" . counsel-git)
+     ("C-c G" . counsel-git-grep)
+     ("C-s" . swiper)
+     ("C-c m" . counsel-imenu)
+     ("C-c A" . counsel-ag)
+     :map ivy-minibuffer-map
+     ("<tab>" . ivy-alt-done)
+     ("<escape>" . minibuffer-keyboard-quit)
+     ("C-r" . counsel-expression-history))
+    :init
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-use-selectable-prompt t)
+    (ivy-mode 1)
+    :bind
+    (("<C-escape>" . ivy-resume)))
+#+END_SRC
+* GIT
+[[https://magit.vc/][Magit]] 提供了通过Emacs执行 =Git= 命令的接口。使用快捷键 =C-x M-g= 打开菜单。
+#+BEGIN_SRC emacs-lisp
+  (unbind-key "C-z" global-map)
+  (use-package magit
+    :bind
+    (("C-;" . magit-dispatch-popup))
+    :init
+    (setq magit-completing-read-function 'ivy-completing-read)
+    (global-magit-file-mode t))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+  (use-package git-gutter
+    :ensure t
+    :init
+    (global-git-gutter-mode t))
+
+  (use-package git-gutter-fringe+
+    :ensure t)
 #+END_SRC
 
 * Clojure 开发
@@ -575,12 +631,14 @@
   (use-package paredit
     :ensure t
     :bind
-    ("M-s" . paredit-slice-sexp)
+    (("M-s" . paredit-slice-sexp)
+     ("C-)" . paredit-forward-slurp-sexp)
+     ("C-}" . paredit-forward-barf-sexp)
+     ("M-r" . paredit-raise-sexp))
     :init
-    (setq paredit-space-for-delimiter-predicates nil)
-    (add-hook 'clojure-mode-hook 'paredit-mode)
-    (add-hook 'cider-repl-mode-hook 'paredit-mode)
-    (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
+    (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
+    (add-hook 'cider-repl-mode-hook #'paredit-mode)
+    (add-hook 'clojure-mode-hook #'paredit-mode))
 
   ;; (use-package aggressive-indent
   ;;   :ensure t
@@ -638,7 +696,24 @@
           (org-indent-mode 1))))
   (use-package org-plus-contrib)
 #+END_SRC
-
+* 隐藏多余的Lighter
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :init
+    (diminish 'highlight-parentheses-mode)
+    (diminish 'highlight-symbol-mode)
+    (diminish 'paredit-mode)
+    (diminish 'ivy-mode)
+    (diminish 'company-mode)
+    (diminish 'yas-minor-mode)
+    (diminish 'git-gutter-mode)
+    (diminish 'eldoc-mode)
+    (diminish 'auto-revert-mode)
+    (diminish 'subword-mode)
+    (diminish 'hs-minor-mode)
+    (diminish 'hideshowvis-minor-mode)
+    (diminish 'clj-refactor-mode))
+#+END_SRC
 
 * FIX
 #+BEGIN_SRC emacs-lisp
