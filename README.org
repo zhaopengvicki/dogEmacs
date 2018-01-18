@@ -129,7 +129,7 @@
         version-control t)
 #+END_SRC
 
-** 对其文件
+** 对齐代码
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-x \\") #'align-regexp)
 #+END_SRC
