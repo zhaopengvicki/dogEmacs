@@ -35,11 +35,14 @@
             (lambda ()
             (face-remap-add-relative 'default
                                        :family "Iosevka Slab"
-                                       :height 160)))
+                                       :height 130)))
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
   (use-package minimal-theme
+    :custom-face
+    (default ((t (:foreground "gray20"))))
+    (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
     :init
     (load-theme 'minimal-light t)
     (set-face-attribute 'fringe nil
@@ -51,6 +54,11 @@
   (setq-default mode-line-format nil)
 #+END_SRC
 * 基本设置
+** 窗口边距
+#+BEGIN_SRC emacs-lisp
+  (setq-default left-margin-width 3 right-margin-width 3)
+  (set-window-buffer nil (current-buffer))
+#+END_SRC
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode 1)
@@ -84,7 +92,7 @@
 
 ** 使用IBuffer
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "C-h C-b") #'ibuffer)
+  (global-set-key [remap list-buffers] 'ibuffer)
 #+END_SRC
 ** Dvorak
 #+BEGIN_SRC emacs-lisp
@@ -112,7 +120,7 @@
 #+END_SRC
 ** 关闭fringe
 #+BEGIN_SRC emacs-lisp
-  (fringe-mode)
+  ;; (fringe-mode t)
 #+END_SRC
 ** 末尾需要一个空行
 #+BEGIN_SRC emacs-lisp
@@ -226,8 +234,10 @@
     (dolist (hook '(prog-mode-hook text-mode-hook))
       (add-hook hook #'whitespace-mode))
     (add-hook 'before-save-hook #'whitespace-cleanup)
+    :custom-face
+    (whitespace-line ((t (:background nil :foreground "red"))))
     :config
-    (setq whitespace-line-column 70)
+    (setq whitespace-line-column 80)
     (setq whitespace-style '(face tabs empty trailing lines-tail)))
 #+END_SRC
 ** 优化复制功能
@@ -255,6 +265,8 @@
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window
     :ensure t
+    :custom-face
+    (aw-leading-char-face ((t (:height 400 :foreground "red"))))
     :bind
     (("C-h C-h" . ace-window))
     :init
@@ -360,14 +372,13 @@
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
-    (add-hook 'tuareg-mode-hook #'user/company-ocaml-init)
     (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
     (add-hook 'clojure-mode-hook #'user/company-clojure-init)
     (add-hook 'eshell-mode-hook #'user/company-eshell-init)
     (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
     (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-    (setq company-idle-delay nil)
+    (setq company-idle-delay t)
     (global-company-mode))
 #+END_SRC
 
@@ -461,13 +472,11 @@
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
-  (use-package git-gutter
+  (use-package diff-hl
     :ensure t
     :init
-    (global-git-gutter-mode t))
-
-  (use-package git-gutter-fringe+
-    :ensure t)
+    (global-diff-hl-mode t)
+    (diff-hl-dired-mode t))
 #+END_SRC
 
 * Java
@@ -513,7 +522,6 @@
     (meghanada-mode))
 #+END_SRC
 * Clojure 开发
-** 高亮匹配的括号。
 ** Clojure相关
 | 按键    | 功能                      |
 |---------+---------------------------|
@@ -526,11 +534,40 @@
       (defui  '(1 :form :defn))
       (assoc  '(1))
       (match  '(1)))
+    :custom-face
+    (cider-result-overlay-face ((t (:background "gray80" :foreground "white"))))
+    (cider-fringe-good-face ((t (:foreground "black"))))
     :init
+    (setq cider-overlays-use-font-lock nil)
     (add-hook 'clojure-mode-hook #'eldoc-mode)
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
+*** 处理括号和逗号的颜色
+#+BEGIN_SRC emacs-lisp
+  (defface dim-face
+     '((((class color) (background dark))
+        (:foreground "grey40"))
+       (((class color) (background light))
+        (:foreground "grey70")))
+     "dim face for paren and comma")
 
+  (defun user/dim-face-fontify-search (limit)
+    (let ((result nil)
+          (finish nil)
+          (bound (+ (point) limit)))
+      (while (not finish)
+        (if (re-search-forward "\\(\\s(\\|\\s)\\|,\\)" bound t)
+            (setq result (match-data)
+                  finish t)
+          (setq finish t)))
+      result))
+
+  (defun user/hook-dim ()
+    (font-lock-add-keywords
+     nil '((user/dim-face-fontify-search . 'dim-face))))
+
+  (add-hook 'clojure-mode-hook #'user/hook-dim)
+#+END_SRC
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
@@ -579,13 +616,20 @@
 
 *** Paredit: S表达式操作
 #+BEGIN_SRC emacs-lisp
+  (defun user/paredit-delete ()
+    (interactive)
+    (if (region-active-p)
+        (call-interactively 'delete-region)
+      (call-interactively 'paredit-backward-delete)))
+
   (use-package paredit
     :ensure t
     :bind
     (("M-s" . paredit-slice-sexp)
      ("C-)" . paredit-forward-slurp-sexp)
      ("C-}" . paredit-forward-barf-sexp)
-     ("M-r" . paredit-raise-sexp))
+     ("M-r" . paredit-raise-sexp)
+     ("<backspace>" . user/paredit-delete))
     :init
     (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode)
@@ -652,7 +696,13 @@
 #+END_SRC
 * 窗口边框
 #+BEGIN_SRC emacs-lisp
-  (setq window-divider-default-bottom-width 1)
-  (setq window-divider-default-places (quote bottom-only))
-  (window-divider-mode 1)
+  (use-package window-divider-mode
+    :no-require t
+    :ensure nil
+    :custom-face
+    (window-divider ((t (:foreground "gray80"))))
+    :init
+    (setq window-divider-default-bottom-width 1)
+    (setq window-divider-default-places (quote bottom-only))
+    (window-divider-mode 1))
 #+END_SRC

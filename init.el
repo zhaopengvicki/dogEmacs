@@ -42,3 +42,20 @@
 
 
 (message "Initialize Finished!")
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (window-divider-mode diff-hl centered-window-mode zenburn-theme white-theme use-package undo-tree solarized-theme restclient realgud rainbow-delimiters parenface2 parenface-plus parenface org-plus-contrib org-bullets neotree minimal-theme meghanada magit kaolin-themes hugsql-ghosts hl-sexp highlight-symbol hideshowvis grayscale-theme goose-theme google-c-style git-gutter-fringe+ git-gutter flycheck-pos-tip flycheck-clojure expand-region exec-path-from-shell ert-expectations emmet-mode easy-kill dummyparens dummy-package dracula-theme diminish creamsody-theme counsel-projectile clj-refactor autodisass-java-bytecode anzu ag ace-window)))
+ '(tramp-syntax (quote default) nil (tramp)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((t (:foreground "gray20"))))
+ '(font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+ '(whitespace-line ((t (:background nil :foreground "red")))))
