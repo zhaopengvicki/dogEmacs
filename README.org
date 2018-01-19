@@ -26,7 +26,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Courier New-14")
+  (set-default-font "Courier-15")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -39,15 +39,23 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package creamsody-theme
+  (use-package minimal-theme
     :init
-    (load-theme 'creamsody t)
-    (creamsody-modeline))
+    (load-theme 'minimal-light t)
+    (set-face-attribute 'fringe nil
+                        :foreground (face-foreground 'default)
+                        :background (face-background 'default)))
+#+END_SRC
+** 隐藏mode-line
+#+BEGIN_SRC emacs-lisp
+  (setq-default mode-line-format nil)
 #+END_SRC
 * 基本设置
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
-  (blink-cursor-mode -1)
+  (blink-cursor-mode 1)
+  (add-hook 'prog-mode-hook
+            (lambda () (set-default 'cursor-type '(bar . 2))))
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
@@ -66,6 +74,7 @@
   (setq frame-title-format " %* %b %I")
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
+  (setq inhibit-startup-message t)
   (menu-bar-mode -1)
   (when (display-graphic-p)
     (tool-bar-mode -1)
@@ -145,7 +154,7 @@
 #+END_SRC
 ** 高亮当前行
 #+BEGIN_SRC emacs-lisp
-  (add-hook 'prog-mode-hook 'hl-line-mode)
+  ;; (add-hook 'prog-mode-hook 'hl-line-mode)
 #+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
@@ -169,7 +178,7 @@
 #+END_SRC
 ** 行高
 #+BEGIN_SRC emacs-lisp
-  (setq-default line-spacing 0)
+  (setq-default line-spacing 5)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
@@ -461,6 +470,48 @@
     :ensure t)
 #+END_SRC
 
+* Java
+#+BEGIN_SRC emacs-lisp
+  (use-package autodisass-java-bytecode
+    :ensure t
+    :defer t)
+
+  (use-package google-c-style
+    :defer t
+    :ensure t
+    :commands
+    (google-set-c-style))
+
+  (use-package meghanada
+    :defer t
+    :init
+    (add-hook 'java-mode-hook
+              (lambda ()
+                (google-set-c-style)
+                (google-make-newline-indent)
+                (meghanada-mode t)
+                (smartparens-mode t)
+                (rainbow-delimiters-mode t)
+                (highlight-symbol-mode t)
+                (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
+
+    :config
+    (use-package realgud
+      :ensure t)
+    (setq indent-tabs-mode nil)
+    (setq tab-width 2)
+    (setq c-basic-offset 2)
+    (setq meghanada-server-remote-debug t)
+    (setq meghanada-javac-xlint "-Xlint:all,-processing")
+    :bind
+    (:map meghanada-mode-map
+          ("C-S-t" . meghanada-switch-testcase)
+          ("M-RET" . meghanada-local-variable)
+          ("M-r" . meghanada-reference)
+          ("M-t" . meghanada-typeinfo))
+    :commands
+    (meghanada-mode))
+#+END_SRC
 * Clojure 开发
 ** 高亮匹配的括号。
 ** Clojure相关
@@ -491,7 +542,9 @@
     (setq cider-prompt-for-symbol nil)
     (setq cider-lein-command "/usr/local/bin/lein")
     (setq cider-boot-command "/usr/local/bin/boot")
-    (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+    (setq cider-cljs-lein-repl
+          "(do (require 'shadow.cljs.devtools.api) (require 'shadow.cljs.devtools.server) (shadow.cljs.devtools.server/start!) (shadow.cljs.devtools.api/watch :app) (shadow.cljs.devtools.api/nrepl-select :app))")
+    ;; (setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
     (setq nrepl-use-ssh-fallback-for-remote-hosts nil)
     (setq cider-use-overlays 'both))
 #+END_SRC
@@ -518,10 +571,10 @@
 ** Lisp 基础
 *** 彩虹括号
 #+BEGIN_SRC emacs-lisp
-  (use-package rainbow-delimiters
-    :ensure t
-    :init
-    (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+  ;; (use-package rainbow-delimiters
+  ;;   :ensure t
+  ;;   :init
+  ;;   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
 #+END_SRC
 
 *** Paredit: S表达式操作
@@ -596,4 +649,10 @@
       (diminish 'clj-refactor-mode)
       (diminish 'anzu-mode)
       (diminish 'undo-tree-mode))
+#+END_SRC
+* 窗口边框
+#+BEGIN_SRC emacs-lisp
+  (setq window-divider-default-bottom-width 1)
+  (setq window-divider-default-places (quote bottom-only))
+  (window-divider-mode 1)
 #+END_SRC
