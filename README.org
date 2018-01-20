@@ -26,7 +26,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Courier-15")
+  (set-default-font "Courier-14")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -35,7 +35,7 @@
             (lambda ()
             (face-remap-add-relative 'default
                                        :family "Iosevka Slab"
-                                       :height 130)))
+                                       :height 140)))
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
@@ -61,9 +61,9 @@
 #+END_SRC
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
-  (blink-cursor-mode 1)
-  (add-hook 'prog-mode-hook
-            (lambda () (set-default 'cursor-type '(bar . 2))))
+  (blink-cursor-mode -1)
+  ;; (add-hook 'prog-mode-hook
+  ;;           (lambda () (setq-local cursor-type '(bar . 2))))
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
@@ -79,7 +79,11 @@
 #+END_SRC
 ** 去掉窗体中不必要的地方
 #+BEGIN_SRC emacs-lisp
-  (setq frame-title-format " %* %b %I")
+  (setq frame-title-format '((:eval (if (buffer-file-name)
+                                        (concat "file:" (abbreviate-file-name (buffer-file-name)))
+                                      "buf: %b"))
+                             "{%*}"
+                             "%p of %I"))
   (setq ring-bell-function 'ignore)
   (setq inhibit-startup-screen t)
   (setq inhibit-startup-message t)
@@ -220,6 +224,12 @@
   (add-hook 'prog-mode-hook #'user/init-hs-mode)
   (bind-key "C-<return>" 'hs-toggle-hiding prog-mode-map)
 #+END_SRC
+** 行号
+#+BEGIN_SRC emacs-lisp
+  (use-package nlinum
+    :bind
+    (("C-h |" . nlinum-mode)))
+#+END_SRC
 * 基础插件
 ** Undo&Redo
 #+BEGIN_SRC emacs-lisp
@@ -274,39 +284,17 @@
 #+END_SRC
 ** 目录树
 #+BEGIN_SRC emacs-lisp
-  (defun neotree-project-dir-toggle ()
-    "Open NeoTree using the project root, using find-file-in-project,
-  or the current buffer directory."
-    (interactive)
-    (let ((project-dir
-	   (ignore-errors
-	     ;;; Pick one: projectile or find-file-in-project
-	     ; (projectile-project-root)
-	     (ffip-project-root)))
-
-	  (file-name (buffer-file-name))
-	  (neo-smart-open t))
-      (if (and (fboundp 'neo-global--window-exists-p)
-	       (neo-global--window-exists-p))
-	  (neotree-hide)
-	(progn
-	  (neotree-show)
-	  (if project-dir
-	      (neotree-dir project-dir))
-	  (if file-name
-	      (neotree-find file-name))))))
-
   (use-package neotree
     :ensure t
     :init
     (setq neo-theme
-	  (if (display-graphic-p)
-	      'ascii
-	    'arrow))
+          (if (display-graphic-p)
+              'ascii
+            'arrow))
     (setq neo-window-fixed-size nil)
     (setq neo-window-width 30)
     :bind
-    (("C-h t" . neotree-project-dir-toggle)))
+    (("C-h t" . neotree-projectile-action)))
 #+END_SRC
 ** Expand Region: 快速选择
 使用[[https://github.com/magnars/expand-region.el][expand-region]] 插件。
@@ -334,6 +322,7 @@
     (("C->" . mc/mark-next-like-this)
      ("C-\\" . mc/skip-to-next-like-this)
      ("C-<" . mc/mark-previous-like-this)
+     ("C-S-r" . mc/mark-all-in-region-regexp)
      ("<escape>" . mc/keyboard-quit))
     :init
     (setq mc/always-run-for-all t))
@@ -372,10 +361,10 @@
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
-    (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
-    (add-hook 'clojure-mode-hook #'user/company-clojure-init)
-    (add-hook 'eshell-mode-hook #'user/company-eshell-init)
-    (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
+    ;; (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
+    ;; (add-hook 'clojure-mode-hook #'user/company-clojure-init)
+    ;; (add-hook 'eshell-mode-hook #'user/company-eshell-init)
+    ;; (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
     (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
     (setq company-idle-delay t)
@@ -410,6 +399,8 @@
     :bind
     (("M-p" . highlight-symbol-prev)
      ("M-n" . highlight-symbol-next))
+    :custom-face
+    (highlight-symbol-face ((t (:underline t))))
     :init
     (add-hook 'prog-mode-hook #'highlight-symbol-mode))
 #+END_SRC
@@ -446,6 +437,7 @@
      ("C-c A" . counsel-ag)
      :map ivy-minibuffer-map
      ("<tab>" . ivy-alt-done)
+     ("<S-return>" . ivy-immediate-done)
      ("<escape>" . minibuffer-keyboard-quit)
      ("C-r" . counsel-expression-history))
     :init
@@ -454,6 +446,9 @@
     (ivy-mode 1)
     :bind
     (("<C-escape>" . ivy-resume)))
+
+
+
 #+END_SRC
 * RESTCLIENT
 #+BEGIN_SRC emacs-lisp
@@ -491,6 +486,8 @@
     :commands
     (google-set-c-style))
 
+  (use-package smartparens)
+
   (use-package meghanada
     :defer t
     :init
@@ -498,18 +495,15 @@
               (lambda ()
                 (google-set-c-style)
                 (google-make-newline-indent)
+                (flycheck-mode t)
                 (meghanada-mode t)
                 (smartparens-mode t)
-                (rainbow-delimiters-mode t)
-                (highlight-symbol-mode t)
+                (setq-local c-basic-offset 2)
+                (setq-local tab-width 2)
                 (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
-
     :config
     (use-package realgud
       :ensure t)
-    (setq indent-tabs-mode nil)
-    (setq tab-width 2)
-    (setq c-basic-offset 2)
     (setq meghanada-server-remote-debug t)
     (setq meghanada-javac-xlint "-Xlint:all,-processing")
     :bind
@@ -520,6 +514,33 @@
           ("M-t" . meghanada-typeinfo))
     :commands
     (meghanada-mode))
+#+END_SRC
+* JavaScript
+#+BEGIN_SRC emacs-lisp
+  (use-package rjsx-mode
+    :init
+    (add-to-list 'auto-mode-alist '("\\.js\\'" . rjsx-mode)))
+
+  (use-package tide
+    :init
+    (add-hook 'rjsx-mode-hook #'setup-tide-mode))
+
+  (defun setup-tide-mode ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq-local flycheck-check-syntax-automatically '(save mode-enabled))
+    (setq-local js2-basic-offset 2)
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1))
+
+  ;; aligns annotation to the right hand side
+  (setq company-tooltip-align-annotations t)
+
+  ;; formats the buffer before saving
+  (add-hook 'before-save-hook 'tide-format-before-save)
+  (add-hook 'typescript-mode-hook #'setup-tide-mode)
 #+END_SRC
 * Clojure 开发
 ** Clojure相关
@@ -625,11 +646,12 @@
   (use-package paredit
     :ensure t
     :bind
-    (("M-s" . paredit-slice-sexp)
-     ("C-)" . paredit-forward-slurp-sexp)
-     ("C-}" . paredit-forward-barf-sexp)
-     ("M-r" . paredit-raise-sexp)
-     ("<backspace>" . user/paredit-delete))
+    (:map paredit-mode-map
+          ("M-s" . paredit-slice-sexp)
+          ("C-)" . paredit-forward-slurp-sexp)
+          ("C-}" . paredit-forward-barf-sexp)
+          ("M-r" . paredit-raise-sexp)
+          ("<backspace>" . user/paredit-delete))
     :init
     (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode)
