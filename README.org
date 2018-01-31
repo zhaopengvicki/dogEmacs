@@ -1,4 +1,4 @@
-#+TITLE: 适用于Org和Clojure的Emacs配置
+#+TITLE: 适用于Clojure的Emacs配置
 #+AUTHOR: Shi Tianshu
 * MacOS 的一些配置
 使用 =option= 作为 =Meta= key.
@@ -20,13 +20,13 @@
 * 样式设置
 ** 界面透明
 #+BEGIN_SRC emacs-lisp
-  (set-frame-parameter (selected-frame) 'alpha '(100 . 90))
-  (add-to-list 'default-frame-alist '(alpha . (100 . 90)))
+  (set-frame-parameter (selected-frame) 'alpha '(100 . 100))
+  (add-to-list 'default-frame-alist '(alpha . (100 . 100)))
 #+END_SRC
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Courier-14")
+  (set-default-font "Anonymous Pro Minus-13")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -39,31 +39,42 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package minimal-theme
-    :custom-face
-    (default ((t (:foreground "gray20"))))
-    (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
-    :init
-    (load-theme 'minimal-light t)
-    (set-face-attribute 'fringe nil
+  (when window-system
+    (use-package minimal-theme
+      :custom-face
+      (default ((t (:foreground "gray20" :background "gray97"))))
+      (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+      :init
+      (load-theme 'minimal-light t)))
+
+  (set-face-attribute 'fringe nil
                         :foreground (face-foreground 'default)
-                        :background (face-background 'default)))
+                        :background (face-background 'default))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
+  ;; (setq-default header-line-format mode-line-format)
   (setq-default mode-line-format nil)
 #+END_SRC
 * 基本设置
+#+END_SRC
+** load-path
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path
+               (expand-file-name "~/.emacs.d/misc"))
+#+END_SRC
 ** 窗口边距
 #+BEGIN_SRC emacs-lisp
-  (setq-default left-margin-width 3 right-margin-width 3)
+  (setq-default left-margin-width 0 right-margin-width 0)
+  (set-frame-parameter nil 'internal-border-width 15)
   (set-window-buffer nil (current-buffer))
 #+END_SRC
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode -1)
   ;; (add-hook 'prog-mode-hook
-  ;;           (lambda () (setq-local cursor-type '(bar . 2))))
+  ;;           (lambda ()
+  ;;             (setq-local cursor-type '(bar . 1))))
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
@@ -79,7 +90,8 @@
 #+END_SRC
 ** 去掉窗体中不必要的地方
 #+BEGIN_SRC emacs-lisp
-  (setq frame-title-format '((:eval (if (buffer-file-name)
+  (setq frame-title-format '((:eval (concat "[" (symbol-name major-mode) "]  "))
+                             (:eval (if (buffer-file-name)
                                         (concat "file:" (abbreviate-file-name (buffer-file-name)))
                                       "buf: %b"))
                              "{%*}"
@@ -186,7 +198,16 @@
 #+END_SRC
 ** 高亮匹配的括号。
 #+BEGIN_SRC emacs-lisp
-  (show-paren-mode t)
+  ;; (show-paren-mode t)
+  (use-package highlight-parentheses
+    :custom-face
+    (hl-paren-face ((t ())))
+    :init
+    (setq hl-paren-delay 0)
+    (setq hl-paren-colors '("black"))
+    (setq hl-paren-background-colors '("gray90"))
+    (add-hook 'clojure-mode-hook #'highlight-parentheses-mode)
+    (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 #+END_SRC
 ** 行高
 #+BEGIN_SRC emacs-lisp
@@ -245,7 +266,7 @@
       (add-hook hook #'whitespace-mode))
     (add-hook 'before-save-hook #'whitespace-cleanup)
     :custom-face
-    (whitespace-line ((t (:background nil :foreground "red"))))
+    (whitespace-line ((t (:background nil :foreground "purple"))))
     :config
     (setq whitespace-line-column 80)
     (setq whitespace-style '(face tabs empty trailing lines-tail)))
@@ -276,7 +297,7 @@
   (use-package ace-window
     :ensure t
     :custom-face
-    (aw-leading-char-face ((t (:height 400 :foreground "red"))))
+    (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
     :bind
     (("C-h C-h" . ace-window))
     :init
@@ -336,24 +357,6 @@
 | C-p (补全菜单中) | 上一项 |
 
 #+BEGIN_SRC emacs-lisp
-  (defun user/company-clojure-init ()
-    (bind-key "TAB" 'company-indent-or-complete-common clojure-mode-map)
-    (bind-key "<tab>" 'company-indent-or-complete-common clojure-mode-map))
-
-  (defun user/company-ocaml-init ()
-    (bind-key "TAB" 'company-indent-or-complete-common tuareg-mode-map)
-    (bind-key "<tab>" 'company-indent-or-complete-common tuareg-mode-map))
-
-  (defun user/company-cider-repl-init ()
-    (bind-key "<tab>" 'company-complete-common cider-repl-mode-map))
-
-  (defun user/company-eshell-init ()
-    (bind-key "<tab>" 'company-complete-common eshell-mode-map))
-
-  (defun user/company-elisp-init ()
-    (bind-key "TAB" 'company-indent-or-complete-common emacs-lisp-mode-map)
-    (bind-key "<tab>" 'company-indent-or-complete-common emacs-lisp-mode-map))
-
   (use-package company
     :bind
     (:map company-active-map
@@ -361,14 +364,18 @@
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
-    ;; (add-hook 'emacs-lisp-mode-hook #'user/company-elisp-init)
-    ;; (add-hook 'clojure-mode-hook #'user/company-clojure-init)
-    ;; (add-hook 'eshell-mode-hook #'user/company-eshell-init)
-    ;; (add-hook 'cider-repl-mode-hook #'user/company-cider-repl-init)
     (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
     (setq company-idle-delay t)
     (global-company-mode))
+#+END_SRC
+*** 使用child-frame
+#+BEGIN_SRC emacs-lisp
+  ;; (use-package company-childframe
+  ;;   :ensure t
+  ;;   :init
+  ;;   (require 'company-childframe)
+  ;;   (company-childframe-mode 1))
 #+END_SRC
 
 ** Projectile: 项目文件导航
@@ -498,8 +505,10 @@
                 (flycheck-mode t)
                 (meghanada-mode t)
                 (smartparens-mode t)
-                (setq-local c-basic-offset 2)
-                (setq-local tab-width 2)
+                (sp-local-pair 'java-mode "<" ">")
+                (setq-local whitespace-line-column 100)
+                (setq c-basic-offset 2)
+                (setq tab-width 2)
                 (add-hook 'before-save-hook 'meghanada-code-beautify-before-save)))
     :config
     (use-package realgud
@@ -557,37 +566,39 @@
       (match  '(1)))
     :custom-face
     (cider-result-overlay-face ((t (:background "gray80" :foreground "white"))))
-    (cider-fringe-good-face ((t (:foreground "black"))))
+    (cider-fringe-good-face ((t (:foreground "#33511c"))))
     :init
+    (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
     (setq cider-overlays-use-font-lock nil)
+    (setq cider-repl-display-help-banner nil)
     (add-hook 'clojure-mode-hook #'eldoc-mode)
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
 *** 处理括号和逗号的颜色
 #+BEGIN_SRC emacs-lisp
-  (defface dim-face
-     '((((class color) (background dark))
-        (:foreground "grey40"))
-       (((class color) (background light))
-        (:foreground "grey70")))
-     "dim face for paren and comma")
+  ;; (defface dim-face
+  ;;    '((((class color) (background dark))
+  ;;       (:foreground "grey40"))
+  ;;      (((class color) (background light))
+  ;;       (:foreground "grey70")))
+  ;;    "dim face for paren and comma")
 
-  (defun user/dim-face-fontify-search (limit)
-    (let ((result nil)
-          (finish nil)
-          (bound (+ (point) limit)))
-      (while (not finish)
-        (if (re-search-forward "\\(\\s(\\|\\s)\\|,\\)" bound t)
-            (setq result (match-data)
-                  finish t)
-          (setq finish t)))
-      result))
+  ;; (defun user/dim-face-fontify-search (limit)
+  ;;   (let ((result nil)
+  ;;         (finish nil)
+  ;;         (bound (+ (point) limit)))
+  ;;     (while (not finish)
+  ;;       (if (re-search-forward "\\(\\s(\\|\\s)\\|,\\)" bound t)
+  ;;           (setq result (match-data)
+  ;;                 finish t)
+  ;;         (setq finish t)))
+  ;;     result))
 
-  (defun user/hook-dim ()
-    (font-lock-add-keywords
-     nil '((user/dim-face-fontify-search . 'dim-face))))
+  ;; (defun user/hook-dim ()
+  ;;   (font-lock-add-keywords
+  ;;    nil '((user/dim-face-fontify-search . 'dim-face))))
 
-  (add-hook 'clojure-mode-hook #'user/hook-dim)
+  ;; (add-hook 'clojure-mode-hook #'user/hook-dim)
 #+END_SRC
 *** Cider: Clojure交互式开发环境
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
@@ -655,7 +666,14 @@
     :init
     (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode)
-    (add-hook 'clojure-mode-hook #'paredit-mode))
+    ;; (add-hook 'clojure-mode-hook #'paredit-mode)
+    )
+
+  (require 'parinfer)
+  (bind-key "C-)" 'paredit-forward-slurp-sexp parinfer-mode-map)
+  (bind-key "C-}" 'paredit-forward-barf-sexp parinfer-mode-map)
+  (bind-key "M-r" 'paredit-raise-sexp parinfer-mode-map)
+  (add-hook 'clojure-mode-hook #'parinfer-mode)
 #+END_SRC
 
 * Org相关
@@ -667,6 +685,7 @@
    'org-babel-load-languages
    '((ditaa . t)
      (clojure . t)
+     (plantuml . t)
      (emacs-lisp . t)
      (python . t)))
 #+END_SRC
@@ -674,6 +693,8 @@
 #+BEGIN_SRC emacs-lisp
   (setq org-ellipsis "⤵")
   (use-package org-bullets
+    :custom-face
+    (org-ellipsis ((t (:foreground "gray40"))))
     :init
     (add-hook 'org-mode-hook 'org-bullets-mode))
 #+END_SRC
@@ -696,6 +717,12 @@
           (org-indent-mode 1))))
   (use-package org-plus-contrib)
 #+END_SRC
+** Plantuml
+#+BEGIN_SRC emacs-lisp
+  (setq org-plantuml-jar-path
+        (expand-file-name "~/.emacs.d/plantuml/plantuml.jar"))
+#+END_SRC
+
 * 隐藏多余的Lighter
 #+BEGIN_SRC emacs-lisp
     (use-package diminish
@@ -725,6 +752,7 @@
     (window-divider ((t (:foreground "gray80"))))
     :init
     (setq window-divider-default-bottom-width 1)
+    (setq window-divider-default-right-width 1)
     (setq window-divider-default-places (quote bottom-only))
     (window-divider-mode 1))
 #+END_SRC
