@@ -12,3 +12,4 @@ PRIVATE.org
 ac-comphist.dat
 tramp
 *.data
+*.elc

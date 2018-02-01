@@ -26,7 +26,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Anonymous Pro Minus-14")
+  (set-default-font "Anonymous Pro Minus-13")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -769,4 +769,8 @@
     (window-divider-mode 1)
     (add-hook 'window-configuration-change-hook
               #'user/update-divider-color))
+#+END_SRC
+* 服务
+#+BEGIN_SRC emacs-lisp
+  (server-start)
 #+END_SRC
