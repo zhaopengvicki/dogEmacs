@@ -26,7 +26,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Anonymous Pro Minus-13")
+  (set-default-font "Anonymous Pro Minus-14")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -358,6 +358,13 @@
 
 #+BEGIN_SRC emacs-lisp
   (use-package company
+    :custom-face
+    (company-scrollbar-fg ((t (:background "gray20"))))
+    (company-scrollbar-bg ((t (:background "gray60"))))
+    (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
+    (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
+    (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
+    (company-tooltip-common ((t (:foreground "gray10" :bold t))))
     :bind
     (:map company-active-map
           ("<escape>" . company-abort)
@@ -745,14 +752,21 @@
 #+END_SRC
 * 窗口边框
 #+BEGIN_SRC emacs-lisp
+  (defun user/update-divider-color ()
+    (if (= 1 (length (window-list)))
+        (set-face-attribute 'window-divider nil :foreground "gray97")
+      (set-face-attribute 'window-divider nil :foreground "gray70")))
+
   (use-package window-divider-mode
     :no-require t
     :ensure nil
     :custom-face
-    (window-divider ((t (:foreground "gray80"))))
+    (window-divider ((t (:foreground "gray97"))))
     :init
     (setq window-divider-default-bottom-width 1)
     (setq window-divider-default-right-width 1)
     (setq window-divider-default-places (quote bottom-only))
-    (window-divider-mode 1))
+    (window-divider-mode 1)
+    (add-hook 'window-configuration-change-hook
+              #'user/update-divider-color))
 #+END_SRC

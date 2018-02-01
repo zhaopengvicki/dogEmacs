@@ -42,26 +42,3 @@
 
 
 (message "Initialize Finished!")
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (company-childframe-mode use-package undo-tree tide smartparens rjsx-mode restclient realgud org-plus-contrib org-bullets nlinum neotree minimal-theme meghanada magit highlight-symbol highlight-parentheses hideshowvis google-c-style expand-region exec-path-from-shell easy-kill diminish diff-hl counsel-projectile company-childframe clj-refactor autodisass-java-bytecode anzu ag ace-window))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:foreground "gray20" :background "gray97"))))
- '(aw-leading-char-face ((t (:height 400 :foreground "blue"))))
- '(cider-fringe-good-face ((t (:foreground "#33511c"))))
- '(cider-result-overlay-face ((t (:background "gray80" :foreground "white"))))
- '(font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
- '(highlight-symbol-face ((t (:underline t))))
- '(hl-paren-face ((t nil)) t)
- '(org-ellipsis ((t (:foreground "gray40"))))
- '(whitespace-line ((t (:background nil :foreground "purple"))))
- '(window-divider ((t (:foreground "gray80")))))
