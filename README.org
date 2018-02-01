@@ -611,6 +611,8 @@
 [[https://cider.readthedocs.io/en/latest/][Cider的使用文档]]
 #+BEGIN_SRC emacs-lisp
   (use-package cider
+    :ensure t
+    :pin melpa-stable-cn
     :bind
     (:map cider-mode-map
           ("C-c <tab>" . cider-inspect-last-result))
@@ -638,6 +640,7 @@
     (unbind-key "TAB" yas-minor-mode-map))
 
   (use-package clj-refactor
+    :pin melpa-stable-cn
     :init
     (cljr-add-keybindings-with-prefix "C-,")
     (add-hook 'clojure-mode-hook #'clj-refactor-mode)

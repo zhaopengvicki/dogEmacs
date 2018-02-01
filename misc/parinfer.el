@@ -292,7 +292,7 @@ detect if cursor in comment are slow."
             parinfer--parse-line (1- (line-number-at-pos begin)))
       (while (and (>= end (point))
                   (not end-of-buffer))
-        (parinfer--parse-1 (min (1+ end) (point-max)))
+        (parinfer--parse-2 (min (1+ end) (point-max)))
         (when (= (point) (point-max))
           (setq end-of-buffer t)))))
   (parinfer--log "parse end"))
