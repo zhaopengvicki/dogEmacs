@@ -52,7 +52,8 @@
 
 (defvar parinfer--ignore-commands
   '(undo undo-tree-undo undo-tree-redo
-         parinfer-shift-left parinfer-shift-right))
+         parinfer-shift-left parinfer-shift-right
+         clojure-align yank yank-pop))
 
 (defvar parinfer--max-process-lines 200)
 
@@ -91,6 +92,8 @@
 (defvar-local parinfer--parse-line-end nil)
 
 (defvar-local parinfer--prev-x nil)
+
+(defvar-local parinfer--simple-delete nil)
 
 (defvar-local parinfer--process-range ())
 
@@ -303,9 +306,48 @@ detect if cursor in comment are slow."
 ;;
 ;; -----------------------------------------------------------------------------
 
+(defun parinfer--simple-insert-p ()
+  "when self-insert-command, only space, backslash, doublequote, paren, semicolon can affect parens."
+  (when (equal this-command 'self-insert-command)
+    (or (parinfer--empty-line-p)
+        (and (not (<= (point) (save-excursion
+                                (back-to-indentation)
+                                (1+ (point)))))
+             (char-before)
+             (let ((ch (char-before)))
+               (not (or (= ch 34)
+                        (= ch 59)
+                        (= ch 40)
+                        (= ch 41)
+                        (= ch 91)
+                        (= ch 93)
+                        (= ch 123)
+                        (= ch 125)
+                        (= ch 92))))))))
+
+(defun parinfer--simple-delete-p (start end)
+  (when (and (equal this-command 'parinfer--backward-delete)
+             (= 1 (- end start)))
+    (or (parinfer--empty-line-p)
+        (and (not (<= start (save-excursion
+                              (goto-char start)
+                              (back-to-indentation)
+                              (1+ (point)))))
+             (let ((ch (char-after start)))
+               (not (or (= ch 34)
+                        (= ch 59)
+                        (= ch 40)
+                        (= ch 41)
+                        (= ch 91)
+                        (= ch 93)
+                        (= ch 123)
+                        (= ch 125)
+                        (= ch 92))))))))
+
 (defun parinfer--skip-p ()
   (or ;; (region-active-p)
    (bound-and-true-p multiple-cursors-mode)
+   (bound-and-true-p cua-mode)
    (seq-contains parinfer--ignore-commands this-command)))
 
 (defun parinfer--opener-p ()
@@ -483,7 +525,11 @@ current line is parinfer--line."
   (forward-char))
 
 (defun parinfer--goto-next-indentation (&optional end)
-  (if (parinfer--indent-p)
+  (if (or (parinfer--indent-p)
+          ;; the first called, maybe point is point-min.
+          ;; we can't return nil for this case.
+          ;; otherwise, the begin must be a top-level indentation.
+          (= (point) (point-min)))
       (let ((end (or end (point-max)))
             (begin (point)))
         (forward-line)
@@ -557,14 +603,18 @@ Return :opener, :closer or :end-of-code. If current point greater than end, goto
 
            (t
             (progn
-              (if (and parinfer--line
-                       (= parinfer--line (parinfer--get-line)))
-                  (forward-char)
-                (when (zerop (skip-syntax-forward "^(^)^w" end))
-                  (forward-symbol 1))))))
+              (forward-char)
+              ;; (if (and parinfer--line
+              ;;          (= parinfer--line (parinfer--get-line)))
+              ;;     (forward-char)
+              ;;   (when (zerop (skip-syntax-forward "^(^)^w" end))
+              ;;     (forward-symbol 1)))
+              )))
           (when (= (point) (point-max))
             (setq end-of-buffer t)))
         ;; (message "%s is %s" (point) found)
+        (when (> (point) end)
+          (goto-char end))
         (or found :end-of-code)))))
 
 (defun parinfer--goto-tail-sexp-opener ()
@@ -766,20 +816,21 @@ and reindent all the  lines following."
 
       ;; handle whitespaces
       (parinfer--goto-line line)
-      (goto-char (line-end-position))
-      (when (and (char-before)
-                 (save-excursion
-                   (backward-char)
-                   (parinfer--comment-p)))
-        (backward-char))
-      (while (and (> (point) (line-beginning-position))
-                  (parinfer--comment-p))
-        (backward-char))
-      (unless (= (point) (line-beginning-position))
-        (while (parinfer--prev-char-whitespace-or-closer-p)
-          (if (= 32 (char-before))
-              (delete-char -1)
-            (backward-char))))
+      (unless (parinfer--line-begin-with-comment-p)
+        (goto-char (line-end-position))
+        (when (and (char-before)
+                   (save-excursion
+                     (backward-char)
+                     (parinfer--comment-p)))
+          (backward-char))
+        (while (and (> (point) (line-beginning-position))
+                    (parinfer--comment-p))
+          (backward-char))
+        (unless (= (point) (line-beginning-position))
+          (while (parinfer--prev-char-whitespace-or-closer-p)
+            (if (= 32 (char-before))
+                (delete-char -1)
+              (backward-char)))))
       (setq parinfer--change-pos nil)
       (setq parinfer--buffer-will-change nil))))
 
@@ -887,7 +938,8 @@ and reindent all the  lines following."
 (defun parinfer--process ()
   ;; (message "process")
   (condition-case ex
-      (unless (parinfer--skip-p)
+      (unless (or (parinfer--skip-p)
+                  (= (point-min) (point-max)))
         (if parinfer--buffer-will-change
             (parinfer--process-changing)
           (parinfer--process-moving))
@@ -952,7 +1004,7 @@ and reindent all the  lines following."
     (when (and (= (point) end)
                parinfer--paren-stack)
       (parinfer--clear-paren-stack-and-insert))
-    (parinfer--execute-op)))
+    ))
 
 (defun parinfer--process-changing ()
   ;; Save end-line and end-x
@@ -980,7 +1032,11 @@ and reindent all the  lines following."
                    (cdr parinfer--process-range))
   (save-excursion
     (parinfer--align-tail-sexp))
-  (parinfer--process-changing-1)
+  (parinfer--restore-position)
+  (unless (or (parinfer--simple-insert-p)
+              parinfer--simple-delete)
+    (parinfer--process-changing-1))
+  (parinfer--execute-op)
   (parinfer--restore-position)
   (parinfer--clear-parse-result)
   (setq parinfer--change-pos (cons (parinfer--get-line)
@@ -990,6 +1046,9 @@ and reindent all the  lines following."
 (defun parinfer--before-change (start end)
   (unless parinfer--buffer-will-change
     (parinfer--log "before change")
+    (if (parinfer--simple-delete-p start end)
+        (setq parinfer--simple-delete t)
+      (setq parinfer--simple-delete nil))
     (setq parinfer--buffer-will-change t
           ;; If we begin within comment, no need to care about lock sexp.
           ;; Here since we haven't parse the buffer, so use parinfer--parse-comment-p
@@ -1001,8 +1060,8 @@ and reindent all the  lines following."
     ;; If command is newline and indent,
     ;; the cursor will first do a backward char
     ;; so we have to incrment parinfer--prev-x
-    (when (equal this-command 'newline-and-indent)
-      (setq parinfer--prev-x (1+ parinfer--prev-x)))
+    ;; (when (equal this-command 'newline-and-indent)
+    ;;   (setq parinfer--prev-x (1+ parinfer--prev-x)))
 
     (parinfer--log "before change end")))
 
@@ -1012,6 +1071,7 @@ and reindent all the  lines following."
     (setq parinfer--delta (if (zerop len)
                               (- end start)
                             (* -1 len)))
+    ;; (message "start %s end %s len %s" start end len)
     (parinfer--log "after change end")))
 
 ;; -----------------------------------------------------------------------------
@@ -1038,17 +1098,27 @@ and reindent all the  lines following."
 (defun parinfer-shift-right (count)
   (interactive "p")
   (if (region-active-p)
-      (parinfer--shift-text count)
+      (parinfer--shift-text 2)
     (call-interactively #'indent-for-tab-command)))
 
 (defun parinfer-shift-left (count)
   (interactive "p")
-  (parinfer--shift-text (- count)))
+  (parinfer--shift-text -2))
 
 (defun parinfer-comment (arg)
   (interactive "*P")
   (comment-dwim arg)
   (parinfer-run))
+
+(defun parinfer--newline ()
+  "Behaviour like `newline-and-indent'.
+ This command work correctly with `before-change-functions' hook."
+  (interactive)
+  (while (and (char-before)
+              (= 32 (char-before)))
+    (delete-char -1))
+  (newline)
+  (lisp-indent-line))
 
 (defun parinfer--backward-delete ()
   (interactive)
@@ -1141,7 +1211,7 @@ and reindent all the  lines following."
 
 (defvar parinfer-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [remap newline] 'newline-and-indent)
+    (define-key map [remap newline] 'parinfer--newline)
     (define-key map [remap comment-dwim] 'parinfer-comment)
     (define-key map (kbd "TAB") 'parinfer-shift-right)
     (define-key map (kbd "<backtab>") 'parinfer-shift-left)

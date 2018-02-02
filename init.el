@@ -32,7 +32,6 @@
 (use-package cl)
 (require 'cl)
 
-
 ;; If README.el exists, load README.el directly.
 ;; Otherwise, use org-babel-load-file.
 (if (file-exists-p "~/.emacs.d/README.el")

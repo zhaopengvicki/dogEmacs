@@ -26,7 +26,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Anonymous Pro Minus-13")
+  (set-default-font "Anonymous Pro Minus-15")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -48,8 +48,8 @@
       (load-theme 'minimal-light t)))
 
   (set-face-attribute 'fringe nil
-                        :foreground (face-foreground 'default)
-                        :background (face-background 'default))
+                        :foreground nil
+                        :background nil)
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
@@ -57,6 +57,10 @@
   (setq-default mode-line-format nil)
 #+END_SRC
 * 基本设置
+** 指定custom-file路径
+#+BEGIN_SRC emacs-lisp
+  (setq custom-file "~/.emacs.d/custom.el")
+#+END_SRC
 #+END_SRC
 ** load-path
 #+BEGIN_SRC emacs-lisp
@@ -78,7 +82,7 @@
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-threshold 50000000)
+  (setq gc-cons-threshold 1024000)
 #+END_SRC
 ** 设置一个快捷键用来重新加载配置文件
 #+BEGIN_SRC emacs-lisp
@@ -201,7 +205,7 @@
   ;; (show-paren-mode t)
   (use-package highlight-parentheses
     :custom-face
-    (hl-paren-face ((t ())))
+    (hl-paren-face ((t (:underline t))))
     :init
     (setq hl-paren-delay 0)
     (setq hl-paren-colors '("black"))
@@ -776,4 +780,12 @@
 * 服务
 #+BEGIN_SRC emacs-lisp
   (server-start)
+#+END_SRC
+* 代码块
+#+BEGIN_SRC emacs-lisp
+  (defun user/insert-emacs-lisp-src-block ()
+    (interactive)
+    (insert "#+BEGIN_SRC emacs-lisp\n\n#+END_SRC\n"))
+
+  (bind-key "C-x C-'" #'user/insert-emacs-lisp-src-block)
 #+END_SRC
