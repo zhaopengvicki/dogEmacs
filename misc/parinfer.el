@@ -525,11 +525,17 @@ current line is parinfer--line."
   (forward-char))
 
 (defun parinfer--goto-next-indentation (&optional end)
-  (if (or (parinfer--indent-p)
-          ;; the first called, maybe point is point-min.
-          ;; we can't return nil for this case.
-          ;; otherwise, the begin must be a top-level indentation.
-          (= (point) (point-min)))
+  "Goto the next indentation and return t if cursor move to the indentation,
+return nil if there's no more indentation position.
+  This function must be called when cursor is on one indentation or point-min, otherwise always return nil."
+  (when (= (point) (point-min))
+    (while (and (or (parinfer--empty-line-p)
+                    (parinfer--line-begin-with-comment-p))
+                (> end (point)))
+      (forward-line))
+    (back-to-indentation))
+  (if (and (parinfer--indent-p)
+           (> end (point)))
       (let ((end (or end (point-max)))
             (begin (point)))
         (forward-line)
@@ -885,12 +891,13 @@ and reindent all the  lines following."
            ((not last-opener)
             (push (list (point) :delete 1) parinfer--op-stack))
            ((not (= last-opener (parinfer--closer-to-opener closer)))
-            (if in-edit-scope
-                (progn
-                  (push (list (point) :delete 1) parinfer--op-stack)
-                  (push last-opener-info parinfer--paren-stack))
-              (let ((correct-closer (parinfer--opener-to-closer last-opener)))
-                (push (list (point) :insert correct-closer) parinfer--op-stack))))))))))
+            (if (equal this-command 'self-insert-command)
+                (let ((correct-closer (parinfer--opener-to-closer last-opener)))
+                  (push (list (point) :insert correct-closer) parinfer--op-stack)
+                  (parinfer--fix-closer))
+              (progn
+                (push (list (point) :delete 1) parinfer--op-stack)
+                (push last-opener-info parinfer--paren-stack))))))))))
 
 (defun parinfer--fix-paren (begin end indent)
   "Fix paren from begin to end(not include)."
