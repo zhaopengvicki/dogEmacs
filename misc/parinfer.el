@@ -53,7 +53,7 @@
 (defvar parinfer--ignore-commands
   '(undo undo-tree-undo undo-tree-redo
          parinfer-shift-left parinfer-shift-right
-         clojure-align yank yank-pop))
+         clojure-align yank yank-pop indent-region))
 
 (defvar parinfer--max-process-lines 200)
 
@@ -154,6 +154,10 @@
 
 (defun parinfer--get-process-range ()
   "Return (begin, end)."
+  (save-excursion
+    (goto-char (point-max))
+    (when (parinfer--string-p)
+      (error "Can't escape string!")))
   (save-mark-and-excursion
     (let* ((pos (point))
            (orig-line-begin (line-beginning-position))
@@ -1165,7 +1169,8 @@ and reindent all the  lines following."
         parinfer--prev-x nil)
   (add-hook 'post-command-hook #'parinfer--process t t)
   (add-hook 'before-change-functions #'parinfer--before-change t t)
-  (add-hook 'after-change-functions #'parinfer--after-change t t))
+  ;; (add-hook 'after-change-functions #'parinfer--after-change t t)
+  )
 
 (defun parinfer-mode-disable ()
   (interactive)
@@ -1174,7 +1179,8 @@ and reindent all the  lines following."
   (parinfer-pretty-parens:refresh)
   (remove-hook 'before-change-functions #'parinfer--before-change t)
   (remove-hook 'post-command-hook #'parinfer--process t)
-  (remove-hook 'after-change-functions #'parinfer--after-change t))
+  ;; (remove-hook 'after-change-functions #'parinfer--after-change t)
+  )
 
 ;; -----------------------------------------------------------------------------
 ;;

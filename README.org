@@ -42,8 +42,9 @@
   (when window-system
     (use-package minimal-theme
       :custom-face
-      (default ((t (:foreground "gray20" :background "gray97"))))
+      (default ((t (:foreground "gray20" :background "white"))))
       (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+      (hl-line ((t (:background "gray97"))))
       :init
       (load-theme 'minimal-light t)))
 
@@ -182,7 +183,7 @@
 #+END_SRC
 ** 高亮当前行
 #+BEGIN_SRC emacs-lisp
-  ;; (add-hook 'prog-mode-hook 'hl-line-mode)
+  (add-hook 'prog-mode-hook 'hl-line-mode)
 #+END_SRC
 ** 在需要确认yes或no的地方使用y或n
 #+BEGIN_SRC emacs-lisp
@@ -264,16 +265,16 @@
 #+END_SRC
 ** Whitespace
 #+BEGIN_SRC emacs-lisp
-  (use-package whitespace
-    :init
-    (dolist (hook '(prog-mode-hook text-mode-hook))
-      (add-hook hook #'whitespace-mode))
-    (add-hook 'before-save-hook #'whitespace-cleanup)
-    :custom-face
-    (whitespace-line ((t (:background nil :foreground "purple"))))
-    :config
-    (setq whitespace-line-column 80)
-    (setq whitespace-style '(face tabs empty trailing lines-tail)))
+  ;; (use-package whitespace
+  ;;   :init
+  ;;   (dolist (hook '(prog-mode-hook text-mode-hook))
+  ;;     (add-hook hook #'whitespace-mode))
+  ;;   (add-hook 'before-save-hook #'whitespace-cleanup)
+  ;;   :custom-face
+  ;;   (whitespace-line ((t (:background nil :foreground "purple"))))
+  ;;   :config
+  ;;   (setq whitespace-line-column 80)
+  ;;   (setq whitespace-style '(face tabs empty trailing lines-tail)))
 #+END_SRC
 ** 优化复制功能
 | 按键  | 功能           |
@@ -386,7 +387,13 @@
   ;;   :ensure t
   ;;   :init
   ;;   (require 'company-childframe)
+  ;;   (setq company-childframe-font "Anonymous Pro Minus-15")
   ;;   (company-childframe-mode 1))
+
+
+  (require 'company-childframe)
+  (setq company-childframe-font "Anonymous Pro Minus-15")
+  (company-childframe-mode 1)
 #+END_SRC
 
 ** Projectile: 项目文件导航
@@ -575,9 +582,6 @@
       (defui  '(1 :form :defn))
       (assoc  '(1))
       (match  '(1)))
-    :custom-face
-    (cider-result-overlay-face ((t (:background "gray80" :foreground "white"))))
-    (cider-fringe-good-face ((t (:foreground "#33511c"))))
     :init
     (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
     (setq cider-overlays-use-font-lock nil)
@@ -617,6 +621,9 @@
   (use-package cider
     :ensure t
     :pin melpa-stable-cn
+    :custom-face
+    (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
+    (cider-fringe-good-face ((t (:foreground "#33511c"))))
     :bind
     (:map cider-mode-map
           ("C-c <tab>" . cider-inspect-last-result))
@@ -761,7 +768,7 @@
 #+BEGIN_SRC emacs-lisp
   (defun user/update-divider-color ()
     (if (= 1 (length (window-list)))
-        (set-face-attribute 'window-divider nil :foreground "gray97")
+        (set-face-attribute 'window-divider nil :foreground "white")
       (set-face-attribute 'window-divider nil :foreground "gray70")))
 
   (use-package window-divider-mode
