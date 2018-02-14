@@ -13,3 +13,5 @@ ac-comphist.dat
 tramp
 *.data
 *.elc
+backup-misc
+custom.el
