@@ -114,6 +114,8 @@
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode -1)
+  (use-package bar-cursor)
+  (bar-cursor-mode +1)
   ;; (set-cursor-color "#A02020")
   ;; (add-hook 'prog-mode-hook
   ;;           (lambda ()
@@ -121,7 +123,8 @@
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
-  (setq gc-cons-threshold 1024)
+  (setq gc-cons-threshold 3500000)
+
 #+END_SRC
 ** 去掉窗体中不必要的地方
 #+BEGIN_SRC emacs-lisp
@@ -396,7 +399,8 @@
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :bind
-    (("<tab>" . company-indent-or-complete-common)
+    (:map prog-mode-map
+          ("<tab>" . company-indent-or-complete-common)
      :map company-active-map
           ("<escape>" . company-abort)
           ("C-n" . company-select-next)
@@ -406,6 +410,85 @@
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
     (setq company-idle-delay nil)
     (global-company-mode))
+#+END_SRC
+** Projectile: 项目文件导航
+使用[[https://github.com/bbatsov/projectile][projectile]] 插件。
+| 按键      | 功能             |
+|-----------+------------------|
+| C-c p f   | 切换项目中的文件 |
+| C-c p p   | 切换项目         |
+| C-c p s s | 项目中AG搜索     |
+
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :defer nil
+    :init
+    (setq projectile-keymap-prefix (kbd "C-z"))
+    (projectile-global-mode 1))
+#+END_SRC
+
+** Highlight Symbol: 高亮文档中光标处的符号
+使用[[https://github.com/nschum/highlight-symbol.el][highlight-symbol]] 插件。
+| 按键 | 功能             |
+|------+------------------|
+| M-p  | 上一次出现的位置 |
+| M-n  | 下一次出现的位置 |
+
+#+BEGIN_SRC emacs-lisp
+  (use-package highlight-symbol
+    :bind
+    (("M-p" . highlight-symbol-prev)
+     ("M-n" . highlight-symbol-next))
+    :custom-face
+    (highlight-symbol-face ((t (:underline t))))
+    :init
+    (add-hook 'prog-mode-hook #'highlight-symbol-mode))
+#+END_SRC
+** IVY 补全
+相比 =ido= 和 =helm=, [[https://github.com/abo-abo/swiper][ivy]] 更简单和快速。
+| 按键              | 功能                             |
+|-------------------+----------------------------------|
+| C-c g             | GIT项目中的文件搜索              |
+| C-c G             | GIT项目中的文件内容搜索          |
+| C-c m             | IMENU                            |
+| C-c a             | AG搜索                           |
+| C-M-j(查找文件中) | 提交当前内容，而不从候选项中选择 |
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ag
+    :ensure t)
+
+  (use-package counsel
+    :ensure t)
+
+  (use-package counsel-projectile
+    :bind
+    (:map projectile-mode-map
+          ("C-z a" . counsel-projectile-ag))
+    :init
+    (setq projectile-completion-system 'ivy))
+
+  (use-package ivy
+    :bind
+    (("C-c g" . counsel-git)
+     ("C-c G" . counsel-git-grep)
+     ("C-s" . swiper)
+     ("C-c m" . counsel-imenu)
+     ("C-c A" . counsel-ag)
+     :map ivy-minibuffer-map
+     ("<tab>" . ivy-alt-done)
+     ("<S-return>" . ivy-immediate-done)
+     ("<escape>" . minibuffer-keyboard-quit)
+     ("C-r" . counsel-expression-history))
+    :init
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-use-selectable-prompt t)
+    (ivy-mode 1)
+    :bind
+    (("<C-escape>" . ivy-resume)))
+
+
+
 #+END_SRC
 * RESTCLIENT
 #+BEGIN_SRC emacs-lisp
@@ -616,16 +699,16 @@
     :init
     (add-hook 'emacs-lisp-mode-hook #'paredit-mode)
     (add-hook 'cider-repl-mode-hook #'paredit-mode)
-    (add-hook 'clojure-mode-hook #'paredit-mode)
+    ;; (add-hook 'clojure-mode-hook #'paredit-mode)
     )
 
-  ;; (require 'parinfer)
-  ;; (bind-key "C-)" 'paredit-forward-slurp-sexp parinfer-mode-map)
-  ;; (bind-key "C-}" 'paredit-forward-barf-sexp parinfer-mode-map)
-  ;; (bind-key "M-r" 'paredit-raise-sexp parinfer-mode-map)
-  ;; (add-hook 'clojure-mode-hook #'parinfer-mode)
 #+END_SRC
 
+*** Parinfer
+#+BEGIN_SRC emacs-lisp
+  (require 'parinfer-smart)
+  (add-hook 'clojure-mode-hook #'parinfer-mode)
+#+END_SRC
 * Org相关
 ** 执行脚本
 #+BEGIN_SRC emacs-lisp
