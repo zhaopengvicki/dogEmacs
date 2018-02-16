@@ -206,6 +206,13 @@ All text after `parinfer--edit-begin' and before this position will be preserved
                 (buffer-substring-no-properties (line-beginning-position)
                                                 (line-end-position))))
 
+(defun parinfer--delete-command-p ()
+  (or (equal this-command 'delete-char)
+      (equal this-command 'delete-backward-char)
+      (equal this-command 'kill-line)
+      (equal this-command 'backward-kill-word)
+      (equal this-command 'kill-word)))
+
 (defun parinfer--has-trail-p ()
   "Must call when we make sure we are after trail."
   (not
@@ -476,8 +483,12 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
                     (progn (pop parinfer--opener-stack)
                            (setq parinfer--trail (1+ pos))))
                 (pop parinfer--opener-stack))
-            (push (cons pos -1)
-                  parinfer--op-stack))))
+            (if (>= pos parinfer--trail)
+                (push (cons pos -1)
+                      parinfer--op-stack)
+              (progn
+                (parinfer--add-error-overlay pos)
+                (error parinfer--error-unmatched-close-paren))))))
     (push (cons pos -1)
           parinfer--op-stack)))
 

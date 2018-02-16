@@ -56,37 +56,37 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
+  ;; (when window-system
+  ;;   (use-package minimal-theme
+  ;;     :custom-face
+  ;;     (fringe ((t (:foreground nil :background nil))))
+  ;;     (default ((t (:foreground "gray20" :background "white"))))
+  ;;     (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
+  ;;     (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+  ;;     (hl-line ((t (:background "gray97"))))
+  ;;     (hl-paren-face ((t (:underline t))))
+  ;;     (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
+  ;;     (company-scrollbar-fg ((t (:background "gray20"))))
+  ;;     (company-scrollbar-bg ((t (:background "gray60"))))
+  ;;     (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
+  ;;     (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
+  ;;     (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
+  ;;     (company-tooltip-common ((t (:foreground "gray10" :bold t))))
+  ;;     (highlight-symbol-face ((t (:underline t))))
+  ;;     (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
+  ;;     (cider-fringe-good-face ((t (:foreground "#33511c"))))
+  ;;     (org-ellipsis ((t (:foreground "gray40"))))
+  ;;     (window-divider ((t (:foreground "gray80"))))
+  ;;     :init
+  ;;     (setq hl-paren-colors '("black"))
+  ;;     (setq hl-paren-background-colors '("gray90"))
+  ;;     (load-theme 'minimal-light t)))
+
   (when window-system
-    (use-package minimal-theme
-      :custom-face
-      (fringe ((t (:foreground nil :background nil))))
-      (default ((t (:foreground "gray20" :background "white"))))
-      (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
-      (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
-      (hl-line ((t (:background "gray97"))))
-      (hl-paren-face ((t (:underline t))))
-      (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
-      (company-scrollbar-fg ((t (:background "gray20"))))
-      (company-scrollbar-bg ((t (:background "gray60"))))
-      (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
-      (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
-      (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
-      (company-tooltip-common ((t (:foreground "gray10" :bold t))))
-      (highlight-symbol-face ((t (:underline t))))
-      (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
-      (cider-fringe-good-face ((t (:foreground "#33511c"))))
-      (org-ellipsis ((t (:foreground "gray40"))))
-      (window-divider ((t (:foreground "gray80"))))
+    (use-package challenger-deep-theme
       :init
-      (setq hl-paren-colors '("black"))
-      (setq hl-paren-background-colors '("gray90"))
-      (load-theme 'minimal-light t)))
-
-
-  ;; (use-package challenger-deep-theme
-  ;;   :init
-  ;;   (setq hl-paren-colors '("white"))
-  ;;   (load-theme 'challenger-deep t))
+      (setq hl-paren-colors '("white"))
+      (load-theme 'challenger-deep t)))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
