@@ -134,8 +134,13 @@ All text after `parinfer--edit-begin' and before this position will be preserved
 ;; CUSTOMIZE
 ;; -----------------------------------------------------------------------------
 
-(defcustom parinfer-preview-cursor-scope t
+(defcustom parinfer-preview-cursor-scope nil
   "Allow temporary leading closer?"
+  :type 'boolean
+  :group 'parinfer)
+
+(defcustom parinfer-partial-process nil
+  "Only process the current top-level sexp?"
   :type 'boolean
   :group 'parinfer)
 
@@ -165,7 +170,8 @@ All text after `parinfer--edit-begin' and before this position will be preserved
 ;; -----------------------------------------------------------------------------
 
 (defun parinfer--handle-indent-delta-p ()
-  (and (not parinfer--from-comment)
+  (and parinfer--buffer-will-change
+       (not parinfer--from-comment)
        (not (region-active-p))
        (not (nth 4 (syntax-ppss)))))
 
@@ -376,15 +382,13 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
     (setq parinfer--in-comment nil
           parinfer--in-string nil
           parinfer--quote-danger nil
-
-          parinfer--edit-begin (if in-comment
+          parinfer--edit-begin (if (or in-comment parinfer--from-comment)
                                    nil
                                  (line-beginning-position))
-
           parinfer--edit-end (if (region-active-p)
                                  (line-beginning-position)
                                (point))
-          parinfer--lock-begin (point)
+          parinfer--lock-begin (if parinfer--from-comment nil (point))
           parinfer--lock-end nil
           parinfer--lock-line-end nil
           parinfer--lock-line-begin (line-number-at-pos parinfer--lock-begin)
@@ -590,6 +594,10 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
       (error parinfer--error-unclosed-quote))
     (parinfer--process-paren-stack 0)
     (parinfer--insert-trail-paren 0)
+    (when parinfer--lock-end
+        (setq parinfer--lock-line-end (line-number-at-pos parinfer--lock-end)))
+      (when parinfer--scope-end
+        (setq parinfer--scope-end-line (line-number-at-pos parinfer--scope-end)))
     (parinfer--execute-op-stack)))
 
 (defun parinfer--process-buffer ()
@@ -629,9 +637,6 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
           (cl-loop for i from parinfer--lock-line-begin to parinfer--scope-end-line do
                    (lisp-indent-line)
                    (forward-line)))))
-    (parinfer--initial-states)
-    (setq parinfer--edit-begin 0
-          parinfer--edit-end 0)
     (parinfer--process-change)
     (setq parinfer--reindent-position nil)))
 
@@ -640,16 +645,14 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
   (parinfer--remove-error-overlay)
   (parinfer--initial-states)
   (let ((handle-indent-delta (parinfer--handle-indent-delta-p)))
-
-    (parinfer--process-buffer)
+    (if parinfer-partial-process
+        (parinfer--process-buffer-with-perf-hack)
+      (parinfer--process-buffer))
     (when handle-indent-delta
       (parinfer--apply-indent-delta))
     ;; allow reindent
     (setq parinfer--buffer-will-change nil)
-    (when handle-indent-delta
-      (setq parinfer--reindent-position (point))
-      ;; (parinfer--log "reindent-pos: %s scope-end-line:%s" (point) parinfer--scope-end-line)
-      )))
+    (setq parinfer--reindent-position (point))))
 
 (defun parinfer--post-command-hook ()
   (condition-case ex
@@ -680,7 +683,7 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
       (define-key selected-keymap (kbd "<tab>") 'parinfer-shift-right)
       (define-key selected-keymap (kbd "<backtab>") 'parinfer-shift-left)
       (selected-minor-mode 1)
-      (add-hook 'post-command-hook #'parinfer--post-command-hook t t)
+      (add-hook 'post-command-hook #'parinfer--post-command-hook nil t)
       (add-hook 'before-change-functions #'parinfer--before-change-hook t t))))
 
 (defun parinfer-mode-disable ()

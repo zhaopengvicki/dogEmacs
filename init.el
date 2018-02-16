@@ -39,5 +39,7 @@
   (cl-letf (((symbol-function 'message) #'format))
     (org-babel-load-file (expand-file-name "~/.emacs.d/README.org"))))
 
+(if (file-exists-p "~/.emacs.d/private.el")
+    (load-file "~/.emacs.d/private.el"))
 
 (message "Initialize Finished!")

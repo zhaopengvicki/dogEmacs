@@ -82,10 +82,11 @@
       (setq hl-paren-background-colors '("gray90"))
       (load-theme 'minimal-light t)))
 
-  ;; (require 'minimal-soft-theme)
-  ;; (setq hl-paren-colors '("black"))
-  ;; ;; (setq hl-paren-background-colors (list (face-attribute 'hl-line :background)))
-  ;; (load-theme 'minimal-soft t)
+
+  ;; (use-package challenger-deep-theme
+  ;;   :init
+  ;;   (setq hl-paren-colors '("white"))
+  ;;   (load-theme 'challenger-deep t))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
@@ -601,6 +602,7 @@
     (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
     (setq cider-overlays-use-font-lock nil)
     (setq cider-repl-display-help-banner nil)
+    (add-hook 'clojure-mode-hook (lambda () (eldoc-mode +1)))
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
 *** 处理括号和逗号的颜色
@@ -791,4 +793,8 @@
     (window-divider-mode 1)
     (add-hook 'window-configuration-change-hook
               #'user/update-divider-color))
+#+END_SRC
+* IRC Client
+#+BEGIN_SRC emacs-lisp
+  (use-package circe)
 #+END_SRC
