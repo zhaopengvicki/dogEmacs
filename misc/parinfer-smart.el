@@ -303,12 +303,19 @@ In this case, we just remove all leading closers."
           (setq found t))
         found)
     (progn
-      (let ((found nil))
+      (let ((count 0)
+            (x nil))
         (while (parinfer--closer-p (char-after))
-          (push (cons (point) -1) parinfer--op-stack)
           (forward-char)
-          (setq found t))
-        found))))
+          (setq count (1+ count)))
+        (unless (zerop count)
+          (save-excursion
+            (ignore-errors (backward-sexp)
+                           (setq x (- (point) (line-beginning-position)))))
+          (when x
+            (delete-region (line-beginning-position) (point))
+            (lisp-indent-line x)))
+        nil))))
 
 (defun parinfer--goto-indentation ()
   "Goto the indentation, and mark all leading closer delete.
@@ -684,7 +691,8 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
           (cl-loop for i from parinfer--lock-line-begin to parinfer--scope-end-line do
                    (lisp-indent-line)
                    (forward-line))
-          (lisp-indent-line))))
+          ;; (lisp-indent-line)
+          )))
     ;; (parinfer--process-change)
     (parinfer--remove-error-overlay)
     (parinfer--initial-states-for-move)
