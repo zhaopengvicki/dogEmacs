@@ -303,10 +303,12 @@ In this case, we just remove all leading closers."
           (setq found t))
         found)
     (progn
-      (while (parinfer--closer-p (char-after))
-        (push (cons (point) -1) parinfer--op-stack)
-        (forward-char))
-      nil)))
+      (let ((found nil))
+        (while (parinfer--closer-p (char-after))
+          (push (cons (point) -1) parinfer--op-stack)
+          (forward-char)
+          (setq found t))
+        found))))
 
 (defun parinfer--goto-indentation ()
   "Goto the indentation, and mark all leading closer delete.
