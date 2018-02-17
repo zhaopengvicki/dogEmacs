@@ -709,6 +709,7 @@
 *** Parinfer
 #+BEGIN_SRC emacs-lisp
   (require 'parinfer-smart)
+  (setq parinfer-preview-cursor-scope t)
   (add-hook 'clojure-mode-hook #'parinfer-mode)
 #+END_SRC
 * Org相关
