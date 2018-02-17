@@ -43,7 +43,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Anonymous Pro Minus-15")
+  (set-default-font "Inconsolata-15")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -56,37 +56,35 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  ;; (when window-system
-  ;;   (use-package minimal-theme
-  ;;     :custom-face
-  ;;     (fringe ((t (:foreground nil :background nil))))
-  ;;     (default ((t (:foreground "gray20" :background "white"))))
-  ;;     (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
-  ;;     (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
-  ;;     (hl-line ((t (:background "gray97"))))
-  ;;     (hl-paren-face ((t (:underline t))))
-  ;;     (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
-  ;;     (company-scrollbar-fg ((t (:background "gray20"))))
-  ;;     (company-scrollbar-bg ((t (:background "gray60"))))
-  ;;     (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
-  ;;     (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
-  ;;     (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
-  ;;     (company-tooltip-common ((t (:foreground "gray10" :bold t))))
-  ;;     (highlight-symbol-face ((t (:underline t))))
-  ;;     (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
-  ;;     (cider-fringe-good-face ((t (:foreground "#33511c"))))
-  ;;     (org-ellipsis ((t (:foreground "gray40"))))
-  ;;     (window-divider ((t (:foreground "gray80"))))
-  ;;     :init
-  ;;     (setq hl-paren-colors '("black"))
-  ;;     (setq hl-paren-background-colors '("gray90"))
-  ;;     (load-theme 'minimal-light t)))
+  (use-package minimal-theme
+    :custom-face
+    (fringe ((t (:foreground nil :background nil))))
+    (default ((t (:foreground "gray20" :background "white"))))
+    (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
+    (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+    (hl-line ((t (:background "gray97"))))
+    (hl-paren-face ((t (:underline t))))
+    (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
+    (company-scrollbar-fg ((t (:background "gray20"))))
+    (company-scrollbar-bg ((t (:background "gray60"))))
+    (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
+    (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
+    (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
+    (company-tooltip-common ((t (:foreground "gray10" :bold t))))
+    (highlight-symbol-face ((t (:underline t))))
+    (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
+    (cider-fringe-good-face ((t (:foreground "#33511c"))))
+    (org-ellipsis ((t (:foreground "gray40"))))
+    (window-divider ((t (:foreground "gray70"))))
+    :init
+    (setq hl-paren-colors '("black"))
+    (setq hl-paren-background-colors '("gray90"))
+    (load-theme 'minimal-light t))
 
-  (when window-system
-    (use-package challenger-deep-theme
-      :init
-      (setq hl-paren-colors '("white"))
-      (load-theme 'challenger-deep t)))
+  ;; (use-package challenger-deep-theme
+  ;;   :init
+  ;;   (setq hl-paren-colors '("white"))
+  ;;   (load-theme 'challenger-deep t))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
@@ -115,9 +113,10 @@
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode -1)
-  (use-package bar-cursor)
-  (bar-cursor-mode +1)
-  ;; (set-cursor-color "#A02020")
+  (use-package bar-cursor
+    :init
+    (bar-cursor-mode +1))
+  (set-cursor-color "black")
   ;; (add-hook 'prog-mode-hook
   ;;           (lambda ()
   ;;             (setq-local cursor-type '(bar . 2))))
@@ -252,7 +251,7 @@
 ** 行高
 #+BEGIN_SRC emacs-lisp
   (defun user/set-line-spacing ()
-    (setq-default line-spacing 5))
+    (setq-default line-spacing 2))
 
   (add-hook 'prog-mode-hook #'user/set-line-spacing)
 #+END_SRC
@@ -709,7 +708,8 @@
 *** Parinfer
 #+BEGIN_SRC emacs-lisp
   (require 'parinfer-smart)
-  (setq parinfer-preview-cursor-scope t)
+  (setq parinfer-preview-cursor-scope t
+        parinfer-partial-process t)
   (add-hook 'clojure-mode-hook #'parinfer-mode)
 #+END_SRC
 * Org相关

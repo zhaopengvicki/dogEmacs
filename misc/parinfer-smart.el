@@ -624,10 +624,7 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
 
 (defun parinfer--process-buffer-with-perf-hack ()
   (save-excursion
-    (if parinfer--buffer-will-change
-        (parinfer--get-process-range)
-      (setq parinfer--process-line-begin 1
-            parinfer--process-line-end (parinfer--get-buffer-max-line)))
+    (parinfer--get-process-range)
     (goto-char (point-min))
     (forward-line (1- parinfer--process-line-begin))
     (cl-loop for i from parinfer--process-line-begin
@@ -681,10 +678,11 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
         ;; the first line need to reindent too.
         ;; lisp-indent-line will always indent to the correct indentation,
         ;; according to the outer sexp, not previous line.
-        (when parinfer--scope-end-line
+        (if parinfer--scope-end-line
           (cl-loop for i from parinfer--lock-line-begin to parinfer--scope-end-line do
                    (lisp-indent-line)
-                   (forward-line)))))
+                   (forward-line))
+          (lisp-indent-line))))
     ;; (parinfer--process-change)
     (parinfer--remove-error-overlay)
     (parinfer--initial-states-for-move)
@@ -707,6 +705,10 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
     (setq parinfer--buffer-will-change nil)
     (setq parinfer--reindent-position (point))))
 
+;; -----------------------------------------------------------------------------
+;; HOOK FUNCTIONS
+;; -----------------------------------------------------------------------------
+
 (defun parinfer--post-command-hook ()
   (condition-case ex
       (unless (parinfer--skip-p)
@@ -728,6 +730,27 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
           parinfer--buffer-will-change t
           parinfer--from-comment (parinfer--in-comment-p))))
 
+(defun parinfer--before-save-hook ()
+  (when parinfer--reindent-position
+    (save-excursion
+      (goto-char parinfer--reindent-position)
+      (unless (save-excursion (back-to-indentation) (= (point) (line-end-position)))
+        (if parinfer--scope-end-line
+          (cl-loop for i from parinfer--lock-line-begin to parinfer--scope-end-line do
+                   (lisp-indent-line)
+                   (forward-line))
+          (lisp-indent-line))))
+    (parinfer--remove-error-overlay)
+    (parinfer--initial-states-for-move)
+    (if parinfer-partial-process
+        (parinfer--process-buffer-with-perf-hack)
+      (parinfer--process-buffer))
+    (setq parinfer--reindent-position nil)))
+
+;; -----------------------------------------------------------------------------
+;; TOGGLE MODES
+;; -----------------------------------------------------------------------------
+
 (defun parinfer-mode-enable ()
   (interactive)
   (if-let* ((msg (parinfer--lint)))
@@ -739,13 +762,15 @@ If this is a comment only line or empty-line, set `parinfer--empty-line' t."
       (define-key selected-keymap (kbd "<backtab>") 'parinfer-shift-left)
       (selected-minor-mode 1)
       (add-hook 'post-command-hook #'parinfer--post-command-hook nil t)
-      (add-hook 'before-change-functions #'parinfer--before-change-hook t t))))
+      (add-hook 'before-change-functions #'parinfer--before-change-hook t t)
+      (add-hook 'before-save-hook #'parinfer--before-save-hook t t))))
 
 (defun parinfer-mode-disable ()
   (interactive)
   (parinfer--disable-dim-paren)
   (remove-hook 'post-command-hook #'parinfer--post-command-hook t)
-  (remove-hook 'before-change-functions #'parinfer--before-change-hook t))
+  (remove-hook 'before-change-functions #'parinfer--before-change-hook t)
+  (remove-hook 'before-save-hook #'parinfer--before-save-hook t))
 
 (defun parinfer-bench ()
   (interactive)
@@ -911,6 +936,8 @@ return (begin . end)."
                  (line-number-at-pos)))
         (end (save-mark-and-excursion
                (goto-char (region-end))
+               (when (= (point) (line-beginning-position))
+                 (backward-char))
                (line-number-at-pos))))
     (parinfer--shift-text (* 2 count))
     (parinfer--goto-line begin)
@@ -926,6 +953,8 @@ return (begin . end)."
                  (line-number-at-pos)))
         (end (save-mark-and-excursion
                (goto-char (region-end))
+               (when (= (point) (line-beginning-position))
+                 (backward-char))
                (line-number-at-pos))))
     (parinfer--shift-text (- (* 2 count)))
     (parinfer--goto-line begin)
