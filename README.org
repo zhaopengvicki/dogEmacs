@@ -43,7 +43,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Inconsolata-15")
+  (set-default-font "Anonymous Pro-14")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -56,35 +56,40 @@
 #+END_SRC
 ** 主题
 #+BEGIN_SRC emacs-lisp
-  (use-package minimal-theme
-    :custom-face
-    (fringe ((t (:foreground nil :background nil))))
-    (default ((t (:foreground "gray20" :background "white"))))
-    (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
-    (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
-    (hl-line ((t (:background "gray97"))))
-    (hl-paren-face ((t (:underline t))))
-    (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
-    (company-scrollbar-fg ((t (:background "gray20"))))
-    (company-scrollbar-bg ((t (:background "gray60"))))
-    (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
-    (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
-    (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
-    (company-tooltip-common ((t (:foreground "gray10" :bold t))))
-    (highlight-symbol-face ((t (:underline t))))
-    (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
-    (cider-fringe-good-face ((t (:foreground "#33511c"))))
-    (org-ellipsis ((t (:foreground "gray40"))))
-    (window-divider ((t (:foreground "gray70"))))
-    :init
-    (setq hl-paren-colors '("black"))
-    (setq hl-paren-background-colors '("gray90"))
-    (load-theme 'minimal-light t))
+  (when window-system
+    (use-package minimal-theme
+      :custom-face
+      (fringe ((t (:foreground nil :background nil))))
+      (default ((t (:foreground "gray20" :background "white"))))
+      (ivy-current-match ((t (:foreground "gray95" :background "gray60"))))
+      (font-lock-builtin-face ((t (:foreground "gray30" :bold t))))
+      (hl-line ((t (:background "gray97"))))
+      (hl-paren-face ((t (:underline t))))
+      (aw-leading-char-face ((t (:height 400 :foreground "blue"))))
+      (company-scrollbar-fg ((t (:background "gray20"))))
+      (company-scrollbar-bg ((t (:background "gray60"))))
+      (company-tooltip-selection ((t (:foreground "gray20" :background "gray90"))))
+      (company-tooltip ((t (:foreground "gray20" :background "gray95"))))
+      (company-tooltip-common-selection ((t (:foreground "gray10" :bold t))))
+      (company-tooltip-common ((t (:foreground "gray10" :bold t))))
+      (highlight-symbol-face ((t (:underline t))))
+      (cider-result-overlay-face ((t (:background "gray50" :foreground "white"))))
+      (cider-fringe-good-face ((t (:foreground "#33511c"))))
+      (org-ellipsis ((t (:foreground "gray40"))))
+      (window-divider ((t (:foreground "gray70"))))
+      :init
+      (setq hl-paren-colors '("black"))
+      (setq hl-paren-background-colors '("gray90"))
+      (load-theme 'minimal-light t)))
 
-  ;; (use-package challenger-deep-theme
-  ;;   :init
-  ;;   (setq hl-paren-colors '("white"))
-  ;;   (load-theme 'challenger-deep t))
+  (unless window-system
+    (use-package minimal-theme
+      :custom-face
+      (default ((t (:background "black"))))
+      :init
+      (setq hl-paren-colors '("white"))
+      (setq hl-paren-background-colors '("gray10"))
+      (load-theme 'minimal t)))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
@@ -116,7 +121,7 @@
   (use-package bar-cursor
     :init
     (bar-cursor-mode +1))
-  (set-cursor-color "black")
+  ;; (set-cursor-color "black")
   ;; (add-hook 'prog-mode-hook
   ;;           (lambda ()
   ;;             (setq-local cursor-type '(bar . 2))))
@@ -399,16 +404,14 @@
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :bind
-    (:map prog-mode-map
-          ("<tab>" . company-indent-or-complete-common)
-     :map company-active-map
+    (:map company-active-map
           ("<escape>" . company-abort)
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
     (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-    (setq company-idle-delay nil)
+    (setq company-idle-delay 0.1)
     (global-company-mode))
 #+END_SRC
 ** Projectile: 项目文件导航
@@ -709,7 +712,7 @@
 #+BEGIN_SRC emacs-lisp
   (require 'parinfer-smart)
   (setq parinfer-preview-cursor-scope t
-        parinfer-partial-process t)
+        parinfer-partial-process nil)
   (add-hook 'clojure-mode-hook #'parinfer-mode)
 #+END_SRC
 * Org相关
@@ -779,10 +782,13 @@
 #+END_SRC
 * 窗口边框
 #+BEGIN_SRC emacs-lisp
+  (setq user/window-divider-fg
+        (face-attribute 'window-divider :foreground))
+
   (defun user/update-divider-color ()
     (if (= 1 (length (window-list)))
         (set-face-attribute 'window-divider nil :foreground (face-attribute 'default :background))
-      (set-face-attribute 'window-divider nil :foreground (face-attribute 'hl-line :background))))
+      (set-face-attribute 'window-divider nil :foreground user/window-divider-fg)))
 
   (use-package window-divider-mode
     :no-require t
