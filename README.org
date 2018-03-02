@@ -43,7 +43,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "Anonymous Pro-14")
+  (set-default-font "CamingoCode-14")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -90,6 +90,11 @@
       (setq hl-paren-colors '("white"))
       (setq hl-paren-background-colors '("gray10"))
       (load-theme 'minimal t)))
+
+  ;; (use-package challenger-deep-theme
+  ;;   :init
+  ;;   (setq hl-paren-colors '("red"))
+  ;;   (load-theme 'challenger-deep t))
 #+END_SRC
 ** 隐藏mode-line
 #+BEGIN_SRC emacs-lisp
@@ -98,6 +103,11 @@
   ;; (setq-default mode-line-format '("point:" (:eval (format "%s" (point)))))
 #+END_SRC
 * 基本设置
+** 关闭electric-indent
+#+BEGIN_SRC emacs-lisp
+  (bind-key "<return>" 'newline-and-indent prog-mode-map)
+  (electric-indent-mode -1)
+#+END_SRC
 ** 指定custom-file路径
 #+BEGIN_SRC emacs-lisp
   (setq custom-file "~/.emacs.d/custom.el")
@@ -118,13 +128,17 @@
 ** 光标闪烁
 #+BEGIN_SRC emacs-lisp
   (blink-cursor-mode -1)
+
+
+  (defun user/set-cursor ()
+    (if (bound-and-true-p multiple-cursors-mode)
+        (bar-cursor-mode -1)
+      (bar-cursor-mode +1)))
+
   (use-package bar-cursor
     :init
+    (add-hook 'multiple-cursors-mode-hook #'user/set-cursor)
     (bar-cursor-mode +1))
-  ;; (set-cursor-color "black")
-  ;; (add-hook 'prog-mode-hook
-  ;;           (lambda ()
-  ;;             (setq-local cursor-type '(bar . 2))))
 #+END_SRC
 ** 设置GC的阈值
 #+BEGIN_SRC emacs-lisp
@@ -215,9 +229,10 @@
 #+END_SRC
 ** 平滑滚动
 #+BEGIN_SRC emacs-lisp
-  (setq scroll-margin 0
-        scroll-conservatively 100000
-        scroll-preserve-screen-position 1)
+  ;; (setq scroll-margin 0
+  ;;       scroll-conservatively 100000
+  ;;       scroll-preserve-screen-position 1)
+  (pixel-scroll-mode +1)
 #+END_SRC
 ** 高亮当前行
 #+BEGIN_SRC emacs-lisp
@@ -258,7 +273,7 @@
   (defun user/set-line-spacing ()
     (setq-default line-spacing 2))
 
-  (add-hook 'prog-mode-hook #'user/set-line-spacing)
+  ;; (add-hook 'prog-mode-hook #'user/set-line-spacing)
 #+END_SRC
 ** 文件在Emacs之外发生修改时自动重新加载
 #+BEGIN_SRC emacs-lisp
@@ -404,14 +419,15 @@
 #+BEGIN_SRC emacs-lisp
   (use-package company
     :bind
-    (:map company-active-map
+    (("<tab>" . company-indent-or-complete-common)
+     :map company-active-map
           ("<escape>" . company-abort)
           ("C-n" . company-select-next)
           ("C-p" . company-select-previous))
     :init
     (add-hook 'cider-repl-mode-hook #'cider-company-enable-fuzzy-completion)
     (add-hook 'cider-mode-hook #'cider-company-enable-fuzzy-completion)
-    (setq company-idle-delay 0.1)
+    (setq company-idle-delay nil)
     (global-company-mode))
 #+END_SRC
 ** Projectile: 项目文件导航
@@ -604,7 +620,8 @@
     (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
     (setq cider-overlays-use-font-lock nil)
     (setq cider-repl-display-help-banner nil)
-    (add-hook 'clojure-mode-hook (lambda () (eldoc-mode +1)))
+    (add-hook 'clojure-mode-hook (lambda ()
+                                   (eldoc-mode +1)))
     (add-hook 'clojure-mode-hook #'subword-mode))
 #+END_SRC
 *** 处理括号和逗号的颜色
@@ -668,7 +685,7 @@
   (use-package clj-refactor
     :pin melpa-cn
     :init
-    (setq cljr-warn-on-eval nil)
+    (setq cljr-warn-on-eval t)
     (cljr-add-keybindings-with-prefix "C-,")
     (add-hook 'clojure-mode-hook #'clj-refactor-mode)
     (add-hook 'clojure-mode-hook #'yas-minor-mode))
@@ -804,4 +821,9 @@
 * IRC Client
 #+BEGIN_SRC emacs-lisp
   (use-package circe)
+#+END_SRC
+* Server
+#+BEGIN_SRC emacs-lisp
+  (unless (server-running-p)
+    (server-start))
 #+END_SRC
