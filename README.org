@@ -43,7 +43,7 @@
 ** 字体设置
 *** 设置代码中使用的字体
 #+BEGIN_SRC emacs-lisp
-  (set-default-font "CamingoCode-14")
+  (set-default-font "CamingoCode-15")
 #+END_SRC
 *** 配置Org-mode使用的字体
 使用一个中英文等宽的字体。
@@ -690,7 +690,13 @@
     (add-hook 'clojure-mode-hook #'clj-refactor-mode)
     (add-hook 'clojure-mode-hook #'yas-minor-mode))
 #+END_SRC
-
+** Inf-Clojure
+#+BEGIN_SRC emacs-lisp
+  (use-package inf-clojure
+    :init
+    (setq inf-clojure-tools-deps-cmd "clojure")
+    (setq inf-clojure-generic-cmd "lumo -d -c src"))
+#+END_SRC
 ** Lisp 基础
 *** 彩虹括号
 #+BEGIN_SRC emacs-lisp
